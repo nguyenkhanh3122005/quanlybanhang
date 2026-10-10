@@ -1,0 +1,110 @@
+import { ProbeDefinition, ProbeId } from "@/types/detector";
+
+export const PROBE_DEFINITIONS: Record<ProbeId, ProbeDefinition> = {
+  llm_fingerprint: {
+    id: "llm_fingerprint",
+    nameVi: "Dấu vân tay LLM",
+    nameEn: "LLM Fingerprint",
+    description: "Đối chiếu xác suất từ ngữ, token boundary và đặc trưng phản xạ đặc thù của dòng mô hình Claude.",
+    category: "core",
+    weight: 15,
+  },
+  non_streaming: {
+    id: "non_streaming",
+    nameVi: "Cấu trúc phi luồng",
+    nameEn: "Non-streaming Structure",
+    description: "Kiểm tra schema JSON phản hồi v1 Messages API: id, type, role, usage, stop_reason.",
+    category: "structure",
+    weight: 10,
+  },
+  thinking_signature: {
+    id: "thinking_signature",
+    nameVi: "Phân tích chữ ký",
+    nameEn: "Thinking Signature Analysis",
+    description: "Xác thực block reasoning 'thinking' và thẻ signature mã hóa của tính năng Extended Thinking.",
+    category: "core",
+    weight: 12,
+  },
+  tool_use: {
+    id: "tool_use",
+    nameVi: "Sử dụng dụng cụ",
+    nameEn: "Tool Use / Function Calling",
+    description: "Kiểm tra khả năng gọi hàm (function calling) chuẩn Anthropic native tool_use format.",
+    category: "capability",
+    weight: 10,
+  },
+  model_identity: {
+    id: "model_identity",
+    nameVi: "Ghi nhận mô hình",
+    nameEn: "Model Identity & System Prompt",
+    description: "Kiểm tra độ tuân thủ nghiêm ngặt System Prompt và nhận thức danh tính để phát hiện model giả mạo.",
+    category: "core",
+    weight: 8,
+  },
+  vision: {
+    id: "vision",
+    nameVi: "Nhận diện hình ảnh",
+    nameEn: "Vision / Multimodal Probe",
+    description: "Gửi ảnh base64 để xác minh proxy hỗ trợ xử lý đa phương thức (Multimodal) thực sự.",
+    category: "capability",
+    weight: 8,
+  },
+  streaming: {
+    id: "streaming",
+    nameVi: "Cấu trúc luồng",
+    nameEn: "Streaming SSE Structure",
+    description: "Phân tích giao thức Server-Sent Events (SSE), các sự kiện message_start, content_block_delta.",
+    category: "structure",
+    weight: 10,
+  },
+  web_search: {
+    id: "web_search",
+    nameVi: "Tìm kiếm trên web",
+    nameEn: "Web Search / Grounding",
+    description: "Đánh giá tính năng tìm kiếm và trích dẫn tài liệu web hoặc citation blocks.",
+    category: "capability",
+    weight: 5,
+  },
+  structured_output: {
+    id: "structured_output",
+    nameVi: "Đầu ra có cấu trúc",
+    nameEn: "Structured Output / JSON Schema",
+    description: "Kiểm tra khả năng sinh JSON nghiêm ngặt tuân thủ schema không kèm markdown thừa.",
+    category: "capability",
+    weight: 7,
+  },
+  knowledge_cutoff: {
+    id: "knowledge_cutoff",
+    nameVi: "Ngưỡng kiến thức",
+    nameEn: "Knowledge Cutoff",
+    description: "Kiểm tra mốc thời gian kiến thức thực tế nhằm phân biệt các thế hệ mô hình.",
+    category: "core",
+    weight: 5,
+  },
+  document_recognition: {
+    id: "document_recognition",
+    nameVi: "Nhận dạng tài liệu",
+    nameEn: "Document Recognition (PDF)",
+    description: "Gửi file PDF mã hóa base64 theo chuẩn Anthropic document content block.",
+    category: "capability",
+    weight: 5,
+  },
+  token_audit: {
+    id: "token_audit",
+    nameVi: "Kiểm toán sử dụng token",
+    nameEn: "Token Usage Audit",
+    description: "Đối chiếu token input/output thực tế với API count_tokens để phát hiện gian lận độn giá token.",
+    category: "billing",
+    weight: 15,
+  },
+};
+
+export const POPULAR_MODELS = [
+  { id: "claude-3-7-sonnet-20250219", name: "Claude 3.7 Sonnet (Latest Thinking)", tag: "Recommended" },
+  { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet v2", tag: "Popular" },
+  { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet v1", tag: "" },
+  { id: "claude-3-opus-20240229", name: "Claude 3 Opus", tag: "Heavyweight" },
+  { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku", tag: "Fast" },
+];
+
+export const DEFAULT_BASE_URL = "https://api.anthropic.com";
