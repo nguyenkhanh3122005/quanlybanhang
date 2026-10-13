@@ -1293,9 +1293,29 @@ app.get('/api/categories', (req, res) => {
   res.json({ success: true, categories: db.getCategories() });
 });
 
-// ZNS Logs
+// ZNS Logs & Connection Kiểm tra
 app.get('/api/zns/logs', (req, res) => {
   res.json({ success: true, logs: db.getZnsLogs() });
+});
+
+// Kiểm tra kết nối Zalo OA thật
+app.get('/api/zns/check-connection', async (req, res) => {
+  try {
+    const result = await znsService.checkZaloConnection();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Làm mới Access Token Zalo OAuth v4
+app.post('/api/zns/refresh-token', async (req, res) => {
+  try {
+    const result = await znsService.refreshAccessToken();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 app.post('/api/zns/test', async (req, res) => {
@@ -1314,7 +1334,14 @@ app.post('/api/zns/test', async (req, res) => {
       totalAmount: Number(totalAmount) || 500000
     };
     const result = await znsService.sendZnsNotification(eventType || 'orderCreated', mockOrder);
-    res.json({ success: true, result });
+    res.json({
+      success: result.success,
+      mode: result.mode,
+      realPhoneSent: result.realPhoneSent,
+      message: result.message,
+      errorMessage: result.errorMessage,
+      result
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -1453,7 +1480,22 @@ app.put('/api/settings', (req, res) => {
       return res.status(403).json({ success: false, message: 'Chỉ Quản trị viên mới có quyền thay đổi cài đặt' });
     }
     const current = db.getSettings();
-    const updated = { ...current, ...req.body };
+    const updated = {
+      ...current,
+      ...req.body,
+      ...(req.body.znsSettings && {
+        znsSettings: {
+          ...(current.znsSettings || {}),
+          ...req.body.znsSettings,
+          ...(req.body.znsSettings.templates && {
+            templates: {
+              ...(current.znsSettings?.templates || {}),
+              ...req.body.znsSettings.templates
+            }
+          })
+        }
+      })
+    };
     db.saveSettings(updated);
     auditService.log({
       user: req.currentUser,

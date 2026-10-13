@@ -1,5 +1,37 @@
 [
   {
+    "id": "log-zns-1791892127138",
+    "orderId": "test-1791892127057",
+    "orderCode": "DH-TEST-2393",
+    "phone": "0982801051",
+    "zaloPhone": "84982801051",
+    "customerName": "Nguyễn Ngọc Khánh",
+    "templateId": "298372",
+    "templateTitle": "GIAO HÀNG THÀNH CÔNG & CẢM ƠN",
+    "status": "sent",
+    "mode": "simulation",
+    "cost": 180,
+    "sentAt": "2026-10-13T11:48:47.139Z",
+    "messagePreview": "Kính gửi Nguyễn Ngọc Khánh,\n\nĐơn hàng #DH-TEST-2393 đã được giao thành công đến bạn.\n\nZNS E-Commerce & Retail Store xin gửi lời cảm ơn chân thành tới bạn. Nếu bạn hài lòng với sản phẩm, hãy dành chút thời gian đánh giá 5 sao cho shop nhé!\n\nHotline hỗ trợ: 0909123456",
+    "templateData": {
+      "customer_name": "Nguyễn Ngọc Khánh",
+      "order_code": "DH-TEST-2393",
+      "complete_date": "18:48 13/10/2026",
+      "store_hotline": "0909123456"
+    },
+    "apiResponse": {
+      "error": 0,
+      "message": "Success (ZNS Sandbox Mode - Mô phỏng thành công)",
+      "data": {
+        "msg_id": "sim_msg_m361eppa",
+        "sent_time": 1791892127349
+      }
+    },
+    "realPhoneSent": false,
+    "errorMessage": null,
+    "simulationNote": "Chế độ Sandbox: Đã mô phỏng thành công trên hệ thống. Tin nhắn KHÔNG gửi tới điện thoại thật."
+  },
+  {
     "id": "log-zns-1791873583955",
     "orderId": "ord-1791873583847",
     "orderCode": "DH-20261013-0005",

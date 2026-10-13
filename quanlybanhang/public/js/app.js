@@ -277,7 +277,7 @@ function switchTab(tabId) {
   else if (tabId === 'audit') loadAuditLogs();
   else if (tabId === 'backups') loadBackupsData();
   else if (tabId === 'monitoring') loadMonitoringData();
-  else if (tabId === 'zns') { loadZnsLogs(); previewZnsSmartphone(); }
+  else if (tabId === 'zns') { loadZnsLogs(); previewZnsSmartphone(); renderZnsModeBanner(); }
   else if (tabId === 'reports') loadReportsData();
 }
 
@@ -1938,6 +1938,65 @@ async function deleteProduct(prodId) {
   } catch (err) {}
 }
 
+// Render Banner cảnh báo chế độ Sandbox vs Live
+function renderZnsModeBanner() {
+  const zs = state.settings?.znsSettings || {};
+  const isLive = zs.mode === 'live';
+  const banner = document.getElementById('zns-mode-alert-banner');
+  const badge = document.getElementById('zns-active-mode-badge');
+  const sidebarBadge = document.getElementById('sidebar-zns-mode');
+
+  if (sidebarBadge) {
+    sidebarBadge.innerText = isLive ? 'Live Zalo' : 'Sandbox';
+    sidebarBadge.className = isLive ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
+  }
+
+  if (badge) {
+    badge.innerText = isLive ? '🟢 Đang ở Chế độ: LIVE OPENAPI' : '🟠 Đang ở Chế độ: SANDBOX MÔ PHỎNG';
+    badge.className = isLive
+      ? 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300'
+      : 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300';
+  }
+
+  if (banner) {
+    if (isLive) {
+      banner.className = 'p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-950 text-xs flex items-start gap-3 shadow-sm';
+      banner.innerHTML = `
+        <i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-bold text-emerald-900 flex items-center gap-2">
+            <span>CHẾ ĐỘ GỬI THẬT (LIVE OPENAPI ĐANG BẬT)</span>
+            <span class="bg-emerald-200 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">GỬI THẬT ĐẾN ZALO KHÁCH</span>
+          </div>
+          <p class="text-slate-700 leading-relaxed text-[11px]">
+            Mọi tin nhắn gửi đi sẽ được chuyển <strong>trực tiếp tới ứng dụng Zalo trên điện thoại khách hàng</strong> qua Zalo Cloud OpenAPI (Phí ~180đ/tin). Vui lòng đảm bảo tài khoản ZCA có số dư và Mẫu tin đã được Zalo duyệt.
+          </p>
+        </div>
+      `;
+    } else {
+      banner.className = 'p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex items-start gap-3 shadow-sm';
+      banner.innerHTML = `
+        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5"></i>
+        <div class="space-y-1.5">
+          <div class="font-bold text-amber-900 flex items-center gap-2">
+            <span>CHẾ ĐỘ MÔ PHỎNG (SANDBOX ĐANG BẬT)</span>
+            <span class="bg-amber-200 text-amber-900 text-[10px] px-2 py-0.5 rounded-full font-bold">KHÔNG GỬI MÁY THẬT</span>
+          </div>
+          <p class="text-slate-700 leading-relaxed text-[11px]">
+            Khi bấm gửi, hệ thống chỉ lưu nhật ký mô phỏng nội bộ để kiểm tra giao diện, <strong>tin nhắn KHÔNG gửi tới điện thoại thật (Điện thoại sẽ không nhận được thông báo Zalo)</strong>.
+          </p>
+          <div class="pt-1 flex flex-wrap items-center gap-2">
+            <button onclick="updateZnsMode('live')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition">
+              <i class="fa-solid fa-bolt"></i> Bật Chế độ Gửi Thật (Live OpenAPI)
+            </button>
+            <span class="text-[11px] text-amber-800 italic">(Để khách nhận được tin thật, cần có Access Token của Zalo OA)</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
 async function loadZnsLogs() {
   try {
     const res = await apiFetch('/api/zns/logs');
@@ -1946,18 +2005,38 @@ async function loadZnsLogs() {
       state.znsLogs = data.logs;
       const tbody = document.getElementById('zns-logs-table-body');
       if (tbody) {
-        if (!data.logs.length) tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Chưa có nhật ký ZNS</td></tr>`;
-        else {
-          tbody.innerHTML = data.logs.map(l => `
-            <tr class="hover:bg-slate-50 text-xs">
-              <td class="px-4 py-2.5 text-slate-500">${formatDate(l.sentAt)}</td>
-              <td class="px-4 py-2.5"><strong>${l.customerName}</strong><div class="font-mono text-slate-500">${l.phone}</div></td>
-              <td class="px-4 py-2.5 font-medium">${l.templateTitle || l.templateId}</td>
-              <td class="px-4 py-2.5 font-mono text-blue-600 font-semibold">${l.orderCode || 'N/A'}</td>
-              <td class="px-4 py-2.5"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${l.status === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${l.status === 'sent' ? 'Thành công' : 'Lỗi'}</span></td>
-              <td class="px-4 py-2.5 text-right font-mono font-semibold">${formatVND(l.cost || 180)}</td>
-            </tr>
-          `).join('');
+        if (!data.logs.length) {
+          tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Chưa có nhật ký ZNS</td></tr>`;
+        } else {
+          tbody.innerHTML = data.logs.map(l => {
+            const isLive = l.mode === 'live';
+            const isSent = l.status === 'sent';
+            return `
+              <tr class="hover:bg-slate-50 text-xs border-b border-slate-100">
+                <td class="px-4 py-2.5 text-slate-500 whitespace-nowrap">${formatDate(l.sentAt)}</td>
+                <td class="px-4 py-2.5">
+                  <strong>${l.customerName || 'Khách hàng'}</strong>
+                  <div class="font-mono text-slate-500">${l.phone || ''}</div>
+                </td>
+                <td class="px-4 py-2.5 whitespace-nowrap">
+                  ${isLive 
+                    ? '<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full text-[10px] font-bold"><i class="fa-solid fa-bolt text-emerald-600 mr-1"></i>Live Thật</span>'
+                    : '<span class="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full text-[10px] font-bold"><i class="fa-solid fa-flask text-amber-600 mr-1"></i>Mô phỏng</span>'}
+                </td>
+                <td class="px-4 py-2.5 font-medium">${l.templateTitle || l.templateId}</td>
+                <td class="px-4 py-2.5 font-mono text-blue-600 font-semibold">${l.orderCode || 'N/A'}</td>
+                <td class="px-4 py-2.5">
+                  <div>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isSent ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+                      ${isSent ? (isLive ? 'Đã gửi máy thật' : 'Thành công (Mô phỏng)') : 'Thất bại'}
+                    </span>
+                    ${l.errorMessage ? `<div class="text-[10px] text-rose-600 mt-1 max-w-xs leading-tight">${l.errorMessage}</div>` : ''}
+                  </div>
+                </td>
+                <td class="px-4 py-2.5 text-right font-mono font-semibold">${formatVND(l.cost || 180)}</td>
+              </tr>
+            `;
+          }).join('');
         }
       }
     }
@@ -1965,15 +2044,15 @@ async function loadZnsLogs() {
 }
 
 async function previewZnsSmartphone(eventType) {
-  const evt = eventType || document.getElementById('test-zns-event')?.value || 'orderCreated';
+  const evt = eventType || document.getElementById('test-zns-event')?.value || 'orderCompleted';
   try {
     const res = await apiFetch(`/api/zns/preview?eventType=${evt}`);
     const data = await res.json();
     if (data.success && data.preview) {
-      document.getElementById('mockup-zns-title').innerText = data.preview.title;
-      document.getElementById('mockup-zns-id').innerText = `#${data.preview.templateId}`;
-      document.getElementById('mockup-zns-body').innerText = data.preview.body;
-      document.getElementById('mockup-header-store').innerText = state.settings.storeName || 'ZNS Store OA';
+      if (document.getElementById('mockup-zns-title')) document.getElementById('mockup-zns-title').innerText = data.preview.title;
+      if (document.getElementById('mockup-zns-id')) document.getElementById('mockup-zns-id').innerText = `#${data.preview.templateId}`;
+      if (document.getElementById('mockup-zns-body')) document.getElementById('mockup-zns-body').innerText = data.preview.body;
+      if (document.getElementById('mockup-header-store')) document.getElementById('mockup-header-store').innerText = state.settings.storeName || 'ZNS Store OA';
     }
   } catch (err) {}
 }
@@ -1985,18 +2064,30 @@ async function triggerTestZnsSend() {
   const totalAmount = document.getElementById('test-zns-amount')?.value;
   if (!phone) return showToast('Vui lòng nhập số điện thoại thử nghiệm!', 'error');
 
+  const zs = state.settings?.znsSettings || {};
+  const isLive = zs.mode === 'live';
+
   try {
     const res = await apiFetch('/api/zns/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, customerName, eventType, totalAmount })
+      body: JSON.stringify({ phone, customerName, eventType, totalAmount: Number(totalAmount) || 0 })
     });
     const data = await res.json();
+
     if (data.success) {
-      showToast(`Đã gửi tin ZNS tới ${phone}!`, 'success');
-      await loadZnsLogs();
+      if (data.mode === 'live') {
+        showToast(`Đã gửi tin nhắn thật thành công tới ứng dụng Zalo của ${phone}!`, 'success');
+      } else {
+        showToast(`[Mô phỏng Sandbox] Đã ghi nhận gửi thử tới ${phone}. (Lưu ý: Không gửi máy thật, hãy bật Live để gửi thật)`, 'info');
+      }
+    } else {
+      showToast(`Gửi tin Zalo thất bại: ${data.errorMessage || data.message || 'Lỗi không xác định'}`, 'error');
     }
-  } catch (err) {}
+    await loadZnsLogs();
+  } catch (err) {
+    showToast('Lỗi gửi tin ZNS', 'error');
+  }
 }
 
 async function updateZnsMode(newMode) {
@@ -2010,27 +2101,134 @@ async function updateZnsMode(newMode) {
     if (data.success) {
       state.settings = data.settings;
       applySettingsToUI();
-      showToast(`Chuyển sang chế độ ZNS: ${newMode === 'live' ? 'Live Zalo' : 'Sandbox'}`, 'info');
+      renderZnsModeBanner();
+      if (newMode === 'live') {
+        showToast('Đã chuyển sang chế độ GỬI THẬT (Live OpenAPI)! Tin nhắn sẽ gửi tới máy khách.', 'success');
+      } else {
+        showToast('Đã chuyển sang chế độ MÔ PHỎNG (Sandbox)!', 'info');
+      }
     }
   } catch (err) {}
+}
+
+async function checkZaloOaConnection() {
+  const box = document.getElementById('zalo-connection-status-box');
+  if (!box) return;
+  box.classList.remove('hidden');
+  box.className = 'p-3 rounded-lg text-xs bg-slate-100 text-slate-700 flex items-center gap-2 border border-slate-200';
+  box.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-600"></i> Đang kết nối kiểm tra Zalo OpenAPI...';
+
+  try {
+    const res = await apiFetch('/api/zns/check-connection');
+    const data = await res.json();
+
+    if (data.success) {
+      if (data.mode === 'simulation') {
+        box.className = 'p-3 rounded-lg text-xs bg-amber-50 text-amber-900 border border-amber-300';
+        box.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5 text-amber-800">
+            <i class="fa-solid fa-flask"></i> Đang ở chế độ Mô Phỏng (Sandbox)
+          </div>
+          <p class="mt-1 text-slate-600">Để kiểm tra kết nối với Zalo OA thật, hãy chuyển sang chế độ <strong>Live OpenAPI</strong> và nhập Access Token.</p>
+        `;
+      } else {
+        const oa = data.oaInfo || {};
+        box.className = 'p-3 rounded-lg text-xs bg-emerald-50 text-emerald-900 border border-emerald-300 flex items-start gap-3';
+        box.innerHTML = `
+          <img src="${oa.avatar || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100'}" class="w-10 h-10 rounded-full border border-emerald-300 object-cover mt-0.5">
+          <div>
+            <div class="font-bold text-sm text-emerald-900 flex items-center gap-1.5">
+              <span>${oa.name || 'Zalo Official Account'}</span>
+              ${oa.is_verified ? '<span class="bg-amber-400 text-slate-900 text-[10px] px-1.5 py-0.2 rounded font-bold"><i class="fa-solid fa-certificate"></i> Tích vàng</span>' : '<span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded">Chưa xác thực</span>'}
+            </div>
+            <div class="text-[11px] text-slate-600 mt-0.5">OA ID: <span class="font-mono font-semibold">${oa.oa_id || state.settings?.znsSettings?.oaId || 'N/A'}</span></div>
+            <div class="text-[11px] text-emerald-700 font-semibold mt-1"><i class="fa-solid fa-check"></i> Kết nối Zalo OA thật hoạt động hoàn hảo! Đã sẵn sàng gửi tin nhắn thật tới khách.</div>
+          </div>
+        `;
+      }
+    } else {
+      box.className = 'p-3 rounded-lg text-xs bg-rose-50 text-rose-900 border border-rose-300';
+      box.innerHTML = `
+        <div class="font-bold text-rose-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-exclamation"></i> Kiểm tra kết nối Zalo OA thất bại
+        </div>
+        <p class="mt-1 text-slate-700 leading-relaxed font-medium">${data.message || 'Access token không hợp lệ hoặc đã hết hạn.'}</p>
+        <p class="mt-1 text-[11px] text-slate-500">Mẹo: Nhập Secret Key và Refresh Token của App Zalo Developers để hệ thống tự động làm mới token.</p>
+      `;
+    }
+  } catch (err) {
+    box.className = 'p-3 rounded-lg text-xs bg-rose-50 text-rose-900 border border-rose-300';
+    box.innerHTML = `<div class="font-bold text-rose-800"><i class="fa-solid fa-circle-exclamation"></i> Lỗi kết nối mạng: ${err.message}</div>`;
+  }
+}
+
+async function refreshZaloTokenNow() {
+  showToast('Đang làm mới Access Token từ Zalo...', 'info');
+  try {
+    const res = await apiFetch('/api/zns/refresh-token', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      if (document.getElementById('zns-access-token')) {
+        document.getElementById('zns-access-token').value = data.accessToken;
+      }
+      showToast('Đã làm mới Access Token thành công!', 'success');
+      await checkZaloOaConnection();
+    } else {
+      showToast(`Làm mới token thất bại: ${data.message || 'Kiểm tra lại App ID, Secret Key và Refresh Token'}`, 'error');
+    }
+  } catch (err) {
+    showToast('Lỗi khi làm mới token', 'error');
+  }
 }
 
 async function saveZnsCredentials() {
   const oaId = document.getElementById('zns-oa-id')?.value.trim();
   const appId = document.getElementById('zns-app-id')?.value.trim();
+  const secretKey = document.getElementById('zns-secret-key')?.value.trim();
+  const refreshToken = document.getElementById('zns-refresh-token')?.value.trim();
   const accessToken = document.getElementById('zns-access-token')?.value.trim();
+  const mode = document.getElementById('zns-mode-select')?.value || 'simulation';
+
+  const tplCreated = document.getElementById('zns-tpl-order-created')?.value.trim();
+  const tplShipping = document.getElementById('zns-tpl-order-shipping')?.value.trim();
+  const tplCompleted = document.getElementById('zns-tpl-order-completed')?.value.trim();
+  const tplCancelled = document.getElementById('zns-tpl-order-cancelled')?.value.trim();
+
+  const prevSettings = state.settings?.znsSettings || {};
+
+  const znsSettings = {
+    ...prevSettings,
+    mode,
+    oaId: oaId || prevSettings.oaId,
+    appId: appId || prevSettings.appId,
+    secretKey: secretKey || prevSettings.secretKey,
+    refreshToken: refreshToken || prevSettings.refreshToken,
+    accessToken: accessToken || prevSettings.accessToken,
+    templates: {
+      orderCreated: { id: tplCreated || '298370', name: 'Xác nhận tạo đơn hàng mới', enabled: true },
+      orderShipping: { id: tplShipping || '298371', name: 'Thông báo xuất kho & Giao hàng', enabled: true },
+      orderCompleted: { id: tplCompleted || '298372', name: 'Giao hàng thành công & Cảm ơn', enabled: true },
+      orderCancelled: { id: tplCancelled || '298373', name: 'Thông báo hủy đơn hàng', enabled: true }
+    }
+  };
+
   try {
     const res = await apiFetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ znsSettings: { ...state.settings.znsSettings, oaId, appId, accessToken: accessToken || state.settings.znsSettings?.accessToken } })
+      body: JSON.stringify({ znsSettings })
     });
     const data = await res.json();
     if (data.success) {
       state.settings = data.settings;
-      showToast('Đã lưu cấu hình Zalo OA!', 'success');
+      applySettingsToUI();
+      renderZnsModeBanner();
+      showToast('Đã lưu cấu hình kết nối Zalo OA thành công!', 'success');
+      await checkZaloOaConnection();
     }
-  } catch (err) {}
+  } catch (err) {
+    showToast('Lỗi lưu cấu hình Zalo OA', 'error');
+  }
 }
 
 async function loadReportsData() {
@@ -2086,8 +2284,7 @@ async function loadSettings() {
 function applySettingsToUI() {
   const s = state.settings;
   const zs = s.znsSettings || {};
-  const modeBadge = document.getElementById('sidebar-zns-mode');
-  if (modeBadge) modeBadge.innerText = zs.mode === 'live' ? 'Live Zalo' : 'Sandbox';
+  renderZnsModeBanner();
 
   if (document.getElementById('setting-store-name')) document.getElementById('setting-store-name').value = s.storeName || '';
   if (document.getElementById('setting-store-phone')) document.getElementById('setting-store-phone').value = s.storePhone || '';
@@ -2102,6 +2299,15 @@ function applySettingsToUI() {
   if (document.getElementById('zns-mode-select')) document.getElementById('zns-mode-select').value = zs.mode || 'simulation';
   if (document.getElementById('zns-oa-id')) document.getElementById('zns-oa-id').value = zs.oaId || '';
   if (document.getElementById('zns-app-id')) document.getElementById('zns-app-id').value = zs.appId || '';
+  if (document.getElementById('zns-secret-key')) document.getElementById('zns-secret-key').value = zs.secretKey || '';
+  if (document.getElementById('zns-refresh-token')) document.getElementById('zns-refresh-token').value = zs.refreshToken || '';
+  if (document.getElementById('zns-access-token')) document.getElementById('zns-access-token').value = zs.accessToken || '';
+
+  const templates = zs.templates || {};
+  if (document.getElementById('zns-tpl-order-created')) document.getElementById('zns-tpl-order-created').value = templates.orderCreated?.id || '298370';
+  if (document.getElementById('zns-tpl-order-shipping')) document.getElementById('zns-tpl-order-shipping').value = templates.orderShipping?.id || '298371';
+  if (document.getElementById('zns-tpl-order-completed')) document.getElementById('zns-tpl-order-completed').value = templates.orderCompleted?.id || '298372';
+  if (document.getElementById('zns-tpl-order-cancelled')) document.getElementById('zns-tpl-order-cancelled').value = templates.orderCancelled?.id || '298373';
 }
 
 async function saveStoreSettings() {
