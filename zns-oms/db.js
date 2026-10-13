@@ -26,7 +26,8 @@ const FILES = {
   products: path.join(DATA_DIR, 'products.json'),
   categories: path.join(DATA_DIR, 'categories.json'),
   zns_logs: path.join(DATA_DIR, 'zns_logs.json'),
-  settings: path.join(DATA_DIR, 'settings.json')
+  settings: path.join(DATA_DIR, 'settings.json'),
+  zalo_leads: path.join(DATA_DIR, 'zalo_leads.json')
 };
 
 const TEMPLATE_FILES = {
@@ -35,7 +36,8 @@ const TEMPLATE_FILES = {
   products: path.join(SOURCE_DATA_DIR, 'products.json'),
   categories: path.join(SOURCE_DATA_DIR, 'categories.json'),
   zns_logs: path.join(SOURCE_DATA_DIR, 'zns_logs.json'),
-  settings: path.join(SOURCE_DATA_DIR, 'settings.json')
+  settings: path.join(SOURCE_DATA_DIR, 'settings.json'),
+  zalo_leads: path.join(SOURCE_DATA_DIR, 'zalo_leads.json')
 };
 
 // Initial default data with version tags for Optimistic Concurrency Control
@@ -410,8 +412,93 @@ const INITIAL_SETTINGS = {
       orderCompleted: { id: '298372', name: 'Cảm ơn & Giao hàng thành công', enabled: true },
       orderCancelled: { id: '298373', name: 'Thông báo hủy đơn hàng', enabled: true }
     }
+  },
+  zaloBotConfig: {
+    enabled: true,
+    welcomeMessage: 'Dạ xin chào Anh/Chị! Cảm ơn Anh/Chị đã nhắn tin tới Shop. Em có thể hỗ trợ tư vấn sản phẩm hoặc báo giá đơn hàng giúp mình ạ?',
+    leadSuccessMessage: 'Dạ em đã lưu thông tin của Anh/Chị {name} (SĐT: {phone}{address}). Chuyên viên CSKH bên em sẽ gọi điện tư vấn và lên đơn ngay cho mình nhé!',
+    keywords: [
+      {
+        keyword: 'giá',
+        reply: 'Dạ các sản phẩm hot bên em đang có giá ưu đãi: Tai nghe Bluetooth Pro Gen 3 chỉ 490k, Củ sạc GaN 65W chỉ 299k, Áo polo cotton 229k. Anh/Chị để lại SĐT và Địa chỉ để shop ship hàng tận nơi nhé!'
+      },
+      {
+        keyword: 'địa chỉ',
+        reply: 'Dạ địa chỉ cửa hàng tại: 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh. Shop có ship COD toàn quốc kiểm tra hàng trước khi thanh toán ạ!'
+      },
+      {
+        keyword: 'ship',
+        reply: 'Dạ shop giao hàng toàn quốc qua GHN và GHTK, thời gian nhận từ 1-3 ngày. Đơn từ 500k được FREESHIP ạ! Anh/Chị cho shop xin SĐT để gửi ưu đãi nhé.'
+      },
+      {
+        keyword: 'bảo hành',
+        reply: 'Dạ toàn bộ sản phẩm bên em đều được bảo hành chính hãng 12 tháng, lỗi 1 đổi 1 trong 30 ngày đầu tiên ạ!'
+      }
+    ]
   }
 };
+
+const INITIAL_ZALO_LEADS = [
+  {
+    id: 'lead-zalo-101',
+    customerName: 'Nguyễn Thu Hà',
+    customerPhone: '0987654321',
+    customerAddress: 'Số 28 ngõ 105 Doãn Kế Thiện, Cầu Giấy, Hà Nội',
+    interestedProduct: 'Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3',
+    productId: 'prod-1',
+    productPrice: 490000,
+    quantity: 1,
+    source: 'Zalo OA Chatbot',
+    messageHistory: [
+      { sender: 'user', text: 'Shop ơi tư vấn cho mình tai nghe bluetooth với, có màu trắng không?', time: '2026-10-13T14:10:00.000Z' },
+      { sender: 'bot', text: 'Dạ Tai nghe Bluetooth TrueWireless Pro Gen 3 bên em có sẵn màu trắng tinh tế, giá ưu đãi 490.000đ ạ. Bạn để lại SĐT và địa chỉ để shop gửi hàng nhé!', time: '2026-10-13T14:10:05.000Z' },
+      { sender: 'user', text: 'Mình tên Hà, sđt 0987654321, ship về số 28 ngõ 105 Doãn Kế Thiện, Cầu Giấy giúp mình nhé', time: '2026-10-13T14:11:30.000Z' },
+      { sender: 'bot', text: 'Dạ em đã lưu thông tin của Chị Hà (SĐT: 0987654321). Chuyên viên CSKH bên em sẽ gọi điện xác nhận và gửi hàng ngay ạ!', time: '2026-10-13T14:11:32.000Z' }
+    ],
+    status: 'new', // 'new' | 'contacted' | 'converted' | 'cancelled'
+    notes: 'Đã bóc tách tự động: Tên: Hà, SĐT: 0987654321, SP: Tai nghe Gen 3',
+    createdAt: '2026-10-13T14:11:30.000Z'
+  },
+  {
+    id: 'lead-zalo-102',
+    customerName: 'Trần Văn Hưng',
+    customerPhone: '0912345999',
+    customerAddress: 'Tòa nhà Bitexco, Số 2 Hải Triều, Bến Nghé, Quận 1, TP.HCM',
+    interestedProduct: 'Củ sạc nhanh GaN 65W 3 cổng Type-C & USB-A',
+    productId: 'prod-2',
+    productPrice: 299000,
+    quantity: 2,
+    source: 'Zalo OA Chatbot',
+    messageHistory: [
+      { sender: 'user', text: 'Alo shop, củ sạc 65w có sạc được cho Macbook không shop? Mình lấy 2 cái', time: '2026-10-13T10:20:00.000Z' },
+      { sender: 'bot', text: 'Dạ củ sạc GaN 65W hỗ trợ sạc chuẩn PD cho Macbook và mọi dòng iPhone/Android ạ. Anh/Chị cho shop xin SĐT và Địa chỉ để shop lên đơn nhé!', time: '2026-10-13T10:20:05.000Z' },
+      { sender: 'user', text: 'Mình là Hưng 0912345999, giao qua Bitexco Q1 giùm mình', time: '2026-10-13T10:21:00.000Z' }
+    ],
+    status: 'converted',
+    orderCode: 'DH-20261013-0002',
+    notes: 'Khách mua 2 củ sạc nhanh GaN, đã chuyển đổi thành đơn hàng',
+    createdAt: '2026-10-13T10:21:00.000Z'
+  },
+  {
+    id: 'lead-zalo-103',
+    customerName: 'Hoàng Minh Đức',
+    customerPhone: '0905123456',
+    customerAddress: 'Hải Châu, Đà Nẵng',
+    interestedProduct: 'Balo Laptop 15.6 inch Chống Thấm Nước',
+    productId: 'prod-4',
+    productPrice: 385000,
+    quantity: 1,
+    source: 'Zalo OA Chatbot',
+    messageHistory: [
+      { sender: 'user', text: 'Balo laptop có chống nước đi mưa to được không bạn? Giá bao nhiêu thế?', time: '2026-10-13T09:00:00.000Z' },
+      { sender: 'bot', text: 'Dạ Balo Laptop 15.6 inch vải Oxford cao cấp chống nước tuyệt đối, giá ưu đãi 385.000đ. Anh để lại SĐT để shop gửi hình ảnh thực tế nhé!', time: '2026-10-13T09:00:04.000Z' },
+      { sender: 'user', text: 'Số mình 0905123456 Đức nhé', time: '2026-10-13T09:02:15.000Z' }
+    ],
+    status: 'contacted',
+    notes: 'Đã gọi điện tư vấn, khách hẹn chiều chốt màu xám',
+    createdAt: '2026-10-13T09:02:15.000Z'
+  }
+];
 
 // ==========================================
 // CLOUD DATABASE & PERSISTENCE ADAPTER
@@ -504,7 +591,8 @@ const memoryCache = {
   products: null,
   categories: null,
   zns_logs: null,
-  settings: null
+  settings: null,
+  zalo_leads: null
 };
 
 // Safe JSON reading and writing with in-memory caching & template fallback
@@ -567,13 +655,14 @@ function initDB() {
   readJSON('orders', FILES.orders, INITIAL_ORDERS, TEMPLATE_FILES.orders);
   readJSON('zns_logs', FILES.zns_logs, INITIAL_ZNS_LOGS, TEMPLATE_FILES.zns_logs);
   readJSON('settings', FILES.settings, INITIAL_SETTINGS, TEMPLATE_FILES.settings);
+  readJSON('zalo_leads', FILES.zalo_leads, INITIAL_ZALO_LEADS, TEMPLATE_FILES.zalo_leads);
 }
 
 // Đồng bộ từ Cloud DB khi khởi động
 async function syncFromCloud() {
   if (cloudStorage.type === 'upstash') {
     try {
-      const keys = ['orders', 'customers', 'products', 'categories', 'zns_logs', 'settings'];
+      const keys = ['orders', 'customers', 'products', 'categories', 'zns_logs', 'settings', 'zalo_leads'];
       for (const k of keys) {
         const cloudData = await cloudStorage.get(`zns_${k}`);
         if (cloudData && (Array.isArray(cloudData) ? cloudData.length > 0 : typeof cloudData === 'object')) {
@@ -623,8 +712,35 @@ const db = {
   },
 
   // Settings
-  getSettings: () => readJSON('settings', FILES.settings, INITIAL_SETTINGS, TEMPLATE_FILES.settings),
+  getSettings: () => {
+    const current = readJSON('settings', FILES.settings, INITIAL_SETTINGS, TEMPLATE_FILES.settings);
+    if (!current.zaloBotConfig) {
+      current.zaloBotConfig = JSON.parse(JSON.stringify(INITIAL_SETTINGS.zaloBotConfig));
+      writeJSON('settings', FILES.settings, current);
+    }
+    return current;
+  },
   saveSettings: (data) => writeJSON('settings', FILES.settings, data),
+
+  // Zalo Leads (Khách hàng thu thập tự động từ Zalo OA Chatbot)
+  getZaloLeads: () => readJSON('zalo_leads', FILES.zalo_leads, INITIAL_ZALO_LEADS, TEMPLATE_FILES.zalo_leads),
+  saveZaloLeads: (data) => writeJSON('zalo_leads', FILES.zalo_leads, data),
+  addZaloLead: (lead) => {
+    const leads = db.getZaloLeads();
+    leads.unshift(lead);
+    writeJSON('zalo_leads', FILES.zalo_leads, leads);
+    return lead;
+  },
+  updateZaloLead: (leadId, updateData) => {
+    const leads = db.getZaloLeads();
+    const idx = leads.findIndex(l => l.id === leadId);
+    if (idx !== -1) {
+      leads[idx] = { ...leads[idx], ...updateData };
+      writeJSON('zalo_leads', FILES.zalo_leads, leads);
+      return leads[idx];
+    }
+    return null;
+  },
 
   // Storage info
   getStorageInfo: () => ({
@@ -636,7 +752,8 @@ const db = {
     itemCounts: {
       orders: (db.getOrders() || []).length,
       products: (db.getProducts() || []).length,
-      customers: (db.getCustomers() || []).length
+      customers: (db.getCustomers() || []).length,
+      zaloLeads: (db.getZaloLeads() || []).length
     }
   }),
 
@@ -742,6 +859,7 @@ const db = {
     writeJSON('orders', FILES.orders, INITIAL_ORDERS);
     writeJSON('zns_logs', FILES.zns_logs, INITIAL_ZNS_LOGS);
     writeJSON('settings', FILES.settings, INITIAL_SETTINGS);
+    writeJSON('zalo_leads', FILES.zalo_leads, INITIAL_ZALO_LEADS);
     return true;
   }
 };

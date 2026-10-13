@@ -1,5 +1,46 @@
 [
   {
+    "id": "ord-1791886985524",
+    "code": "DH-20261013-5559",
+    "customerId": "cust-zalo-1791886985524",
+    "customerName": "Mai Lan",
+    "customerPhone": "0912345678",
+    "customerAddress": "120 Cầu Giấy HN",
+    "carrier": "Giao Hàng Nhanh (GHN)",
+    "trackingCode": "",
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "orderStatus": "pending",
+    "items": [
+      {
+        "productId": "prod-1",
+        "name": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+        "sku": "SP-TAI-NGHE-01",
+        "price": 490000,
+        "quantity": 2,
+        "total": 980000
+      }
+    ],
+    "subtotal": 980000,
+    "shippingFee": 30000,
+    "discount": 0,
+    "totalAmount": 1010000,
+    "customerNote": "Đơn chốt từ Zalo OA Chatbot (Lead ID: lead-zalo-1791886971959)",
+    "staffNote": "Nhân viên chốt đơn từ tin nhắn Zalo",
+    "timeline": [
+      {
+        "status": "pending",
+        "title": "Tự động tạo đơn từ Zalo Lead",
+        "desc": "Chuyển đổi thành công từ khách hàng Zalo [Mai Lan - 0912345678]",
+        "time": "2026-10-13T10:23:05.524Z",
+        "user": "Zalo Bot OMS"
+      }
+    ],
+    "znsSent": false,
+    "createdAt": "2026-10-13T10:23:05.524Z",
+    "updatedAt": "2026-10-13T10:23:05.524Z"
+  },
+  {
     "id": "ord-1791873583847",
     "code": "DH-20261013-0005",
     "customerId": "cust-1791873583846",

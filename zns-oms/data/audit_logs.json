@@ -1,5 +1,133 @@
 [
   {
+    "id": "aud-1791889689429-68ay",
+    "timestamp": "2026-10-13T11:08:09.429Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo OA Chatbot",
+      "role": "chatbot"
+    },
+    "entityType": "CUSTOMER_LEAD",
+    "entityId": "0978123456",
+    "action": "ZALO_LEAD_CAPTURED",
+    "description": "Tự động thu thập thông tin khách hàng Hoàng Long (0978123456) từ Zalo OA",
+    "changes": [],
+    "reason": "Shop ơi mình là Hoàng Long ở số 88 Cầu Giấy HN, sdt 0978123456. Shop còn áo polo ko ship mình 1 cái nhé",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791886985544-wssm",
+    "timestamp": "2026-10-13T10:23:05.544Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo Bot",
+      "role": "admin"
+    },
+    "entityType": "ORDER",
+    "entityId": "DH-20261013-5559",
+    "action": "CONVERT_ZALO_LEAD",
+    "description": "Chuyển đổi Lead Zalo [Mai Lan] thành đơn hàng #DH-20261013-5559 trị giá 1.010.000đ",
+    "changes": [],
+    "reason": "",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791886971971-ht91",
+    "timestamp": "2026-10-13T10:22:51.971Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo OA Chatbot",
+      "role": "chatbot"
+    },
+    "entityType": "CUSTOMER_LEAD",
+    "entityId": "0912345678",
+    "action": "ZALO_LEAD_CAPTURED",
+    "description": "Tự động thu thập thông tin khách hàng Mai Lan (0912345678) từ Zalo OA",
+    "changes": [],
+    "reason": "Chào shop, mình tên là Mai Lan ở 120 Cầu Giấy HN, sđt 0912345678. Mình muốn đặt 2 cái tai nghe bluetooth",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791886610159-607f",
+    "timestamp": "2026-10-13T10:16:50.159Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo OA Chatbot",
+      "role": "chatbot"
+    },
+    "entityType": "CUSTOMER_LEAD",
+    "entityId": "0912345678",
+    "action": "ZALO_LEAD_CAPTURED",
+    "description": "Tự động thu thập thông tin khách hàng Mai Lan Ở (0912345678) từ Zalo OA",
+    "changes": [],
+    "reason": "Chào shop, mình tên là Mai Lan ở 120 Cầu Giấy HN, sđt 0912345678. Mình muốn đặt 2 cái tai nghe bluetooth",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791886458558-smcv",
+    "timestamp": "2026-10-13T10:14:18.558Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo OA Chatbot",
+      "role": "chatbot"
+    },
+    "entityType": "CUSTOMER_LEAD",
+    "entityId": "0988665544",
+    "action": "ZALO_LEAD_CAPTURED",
+    "description": "Tự động thu thập thông tin khách hàng Khách hàng Zalo (0988665544) từ Zalo OA",
+    "changes": [],
+    "reason": "D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791886396411-5fo0",
+    "timestamp": "2026-10-13T10:13:16.411Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo OA Chatbot",
+      "role": "chatbot"
+    },
+    "entityType": "CUSTOMER_LEAD",
+    "entityId": "0988665544",
+    "action": "ZALO_LEAD_CAPTURED",
+    "description": "Tự động thu thập thông tin khách hàng Khách hàng Zalo (0988665544) từ Zalo OA",
+    "changes": [],
+    "reason": "D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791886378543-lgsz",
+    "timestamp": "2026-10-13T10:12:58.543Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo OA Chatbot",
+      "role": "chatbot"
+    },
+    "entityType": "CUSTOMER_LEAD",
+    "entityId": "0988665544",
+    "action": "ZALO_LEAD_CAPTURED",
+    "description": "Tự động thu thập thông tin khách hàng Khách hàng Zalo (0988665544) từ Zalo OA",
+    "changes": [],
+    "reason": "D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�",
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "aud-1791885133928-xpsq",
+    "timestamp": "2026-10-13T09:52:13.929Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo ZNS Webhook",
+      "role": "webhook"
+    },
+    "entityType": "ZNS",
+    "entityId": "0912345678",
+    "action": "ZNS_CALLBACK_RECEIVED",
+    "description": "Nhận callback từ Zalo OA: sự kiện [zns_delivered]",
+    "changes": [],
+    "reason": "{\"event_name\":\"zns_delivered\",\"phone\":\"0912345678\"}",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": "aud-1791874861171-975j",
     "timestamp": "2026-10-13T07:01:01.171Z",
     "user": {

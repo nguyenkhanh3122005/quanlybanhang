@@ -79,9 +79,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCustomers();
   await loadOrders();
   await loadDashboard();
+  loadZaloLeads();
 
   const hash = window.location.hash.replace('#', '');
-  if (hash && ['dashboard', 'orders', 'customers', 'products', 'logistics', 'reconciliation', 'zns', 'audit', 'backups', 'monitoring', 'reports', 'settings'].includes(hash)) {
+  if (hash && ['dashboard', 'orders', 'customers', 'products', 'logistics', 'reconciliation', 'zns', 'zalobot', 'audit', 'backups', 'monitoring', 'reports', 'settings'].includes(hash)) {
     switchTab(hash);
   } else {
     switchTab('dashboard');
@@ -239,7 +240,7 @@ function switchTab(tabId) {
     activeBNav.classList.add('text-blue-600');
   }
 
-  const viewSections = ['dashboard', 'orders', 'customers', 'products', 'logistics', 'reconciliation', 'zns', 'audit', 'backups', 'monitoring', 'reports', 'settings'];
+  const viewSections = ['dashboard', 'orders', 'customers', 'products', 'logistics', 'reconciliation', 'zns', 'zalobot', 'audit', 'backups', 'monitoring', 'reports', 'settings'];
   viewSections.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
@@ -256,6 +257,7 @@ function switchTab(tabId) {
     logistics: 'Vận chuyển Bưu cục & Webhook Simulator',
     reconciliation: 'Đối soát Tiền COD & VietQR Webhook',
     zns: 'Zalo Notification Service (ZNS) Hub',
+    zalobot: 'Zalo Chatbot & Tự Động Thu Thập Khách Hàng (AI Lead Engine)',
     audit: 'Nhật ký Kiểm toán Toàn diện (Audit Trail)',
     backups: 'Quản trị Bản sao lưu & Khôi phục CSDL',
     monitoring: 'Hàng đợi Tác vụ Ngầm & Giám sát Hệ thống',
@@ -271,6 +273,7 @@ function switchTab(tabId) {
   else if (tabId === 'products') renderProductsTable();
   else if (tabId === 'logistics') loadLogisticsData();
   else if (tabId === 'reconciliation') loadReconciliationData();
+  else if (tabId === 'zalobot') { loadZaloLeads(); loadZaloBotConfig(); }
   else if (tabId === 'audit') loadAuditLogs();
   else if (tabId === 'backups') loadBackupsData();
   else if (tabId === 'monitoring') loadMonitoringData();
@@ -2186,4 +2189,385 @@ function copyWebhookUrl(elementId) {
     showToast('Đã sao chép Webhook URL!', 'success');
   });
 }
+
+// ==============================================
+// 15. ZALO CHATBOT & CUSTOMER LEAD ENGINE
+// ==============================================
+let zaloLeadsData = [];
+
+function switchZaloSubTab(subTab) {
+  const tabs = ['leads', 'simulator', 'config'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`subtab-btn-${t}`);
+    const content = document.getElementById(`subtab-content-${t}`);
+    if (btn) {
+      if (t === subTab) {
+        btn.className = 'px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-sm flex items-center gap-2 transition';
+      } else {
+        btn.className = 'px-4 py-2 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-2 transition';
+      }
+    }
+    if (content) {
+      if (t === subTab) content.classList.remove('hidden');
+      else content.classList.add('hidden');
+    }
+  });
+}
+
+async function loadZaloLeads() {
+  try {
+    const res = await apiFetch('/api/zalo-bot/leads');
+    const data = await res.json();
+    if (data.success) {
+      zaloLeadsData = data.leads || [];
+      renderZaloLeadsTable(zaloLeadsData);
+      updateZaloLeadsStats(zaloLeadsData);
+    }
+  } catch (err) {
+    console.error('Lỗi tải Zalo Leads:', err);
+  }
+}
+
+function updateZaloLeadsStats(leads) {
+  const total = leads.length;
+  const newLeads = leads.filter(l => l.status === 'new').length;
+  const converted = leads.filter(l => l.status === 'converted').length;
+
+  if (document.getElementById('stat-total-leads')) document.getElementById('stat-total-leads').innerText = total;
+  if (document.getElementById('stat-new-leads')) document.getElementById('stat-new-leads').innerText = newLeads;
+  if (document.getElementById('stat-converted-leads')) document.getElementById('stat-converted-leads').innerText = converted;
+  if (document.getElementById('subtab-lead-count')) document.getElementById('subtab-lead-count').innerText = total;
+
+  const badgeNav = document.getElementById('badge-nav-leads');
+  if (badgeNav) {
+    if (newLeads > 0) {
+      badgeNav.innerText = `${newLeads} Mới`;
+      badgeNav.className = 'px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse';
+    } else {
+      badgeNav.innerText = 'AI Lead';
+      badgeNav.className = 'px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30';
+    }
+  }
+}
+
+function filterZaloLeads() {
+  const q = (document.getElementById('zalo-leads-search')?.value || '').toLowerCase().trim();
+  const statusFilter = document.getElementById('zalo-leads-filter-status')?.value || 'all';
+
+  let filtered = zaloLeadsData.filter(l => {
+    const matchStatus = statusFilter === 'all' || l.status === statusFilter;
+    const matchQuery = !q ||
+      (l.customerName && l.customerName.toLowerCase().includes(q)) ||
+      (l.customerPhone && l.customerPhone.includes(q)) ||
+      (l.interestedProduct && l.interestedProduct.toLowerCase().includes(q)) ||
+      (l.customerAddress && l.customerAddress.toLowerCase().includes(q));
+    return matchStatus && matchQuery;
+  });
+
+  renderZaloLeadsTable(filtered);
+}
+
+function renderZaloLeadsTable(leads) {
+  const tbody = document.getElementById('zalo-leads-table-body');
+  if (!tbody) return;
+
+  if (!leads || leads.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-8 text-slate-400">
+          <i class="fa-solid fa-address-book text-3xl mb-2 block opacity-40"></i>
+          Không tìm thấy khách hàng tiềm năng nào từ Zalo
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = leads.map(l => {
+    const lastMsg = l.messageHistory && l.messageHistory.length ? l.messageHistory[l.messageHistory.length - 1].text : (l.notes || '');
+    const isConverted = l.status === 'converted';
+
+    return `
+      <tr class="hover:bg-slate-50/80 transition">
+        <td class="px-4 py-3">
+          <div class="font-bold text-slate-900">${escapeHtml(l.customerName || 'Khách Zalo')}</div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="font-mono text-blue-600 font-semibold">${l.customerPhone || 'N/A'}</span>
+            <a href="https://zalo.me/${l.customerPhone}" target="_blank" class="text-[10px] text-blue-500 hover:text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded" title="Nhắn Zalo">
+              <i class="fa-solid fa-comment-dots"></i> Zalo
+            </a>
+            <a href="tel:${l.customerPhone}" class="text-[10px] text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded" title="Gọi điện">
+              <i class="fa-solid fa-phone"></i> Gọi
+            </a>
+          </div>
+        </td>
+        <td class="px-4 py-3 text-slate-600 max-w-xs truncate" title="${escapeHtml(l.customerAddress || '')}">
+          ${escapeHtml(l.customerAddress || 'Chưa có địa chỉ')}
+        </td>
+        <td class="px-4 py-3">
+          <div class="font-semibold text-slate-800">${escapeHtml(l.interestedProduct || 'Tư vấn')}</div>
+          ${l.productPrice ? `<div class="text-[11px] text-slate-500">${formatVND(l.productPrice)} (SL: ${l.quantity || 1})</div>` : ''}
+        </td>
+        <td class="px-4 py-3 text-slate-500 italic max-w-xs truncate" title="${escapeHtml(lastMsg)}">
+          "${escapeHtml(lastMsg)}"
+        </td>
+        <td class="px-4 py-3 text-slate-500 whitespace-nowrap">
+          ${formatDate(l.createdAt)}
+        </td>
+        <td class="px-4 py-3">
+          <div class="relative inline-block">
+            <select onchange="updateZaloLeadStatus('${l.id}', this.value)" class="text-[10px] font-bold rounded-full px-2 py-0.5 border cursor-pointer ${
+              l.status === 'new' ? 'bg-amber-50 text-amber-800 border-amber-300' :
+              l.status === 'converted' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+              l.status === 'contacted' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+              'bg-slate-50 text-slate-600 border-slate-300'
+            }">
+              <option value="new" ${l.status === 'new' ? 'selected' : ''}>Mới thu thập</option>
+              <option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>Đang liên hệ</option>
+              <option value="converted" ${l.status === 'converted' ? 'selected' : ''}>Đã chốt đơn</option>
+              <option value="cancelled" ${l.status === 'cancelled' ? 'selected' : ''}>Hủy / Không nhu cầu</option>
+            </select>
+          </div>
+          ${l.orderCode ? `<div class="mt-1 font-mono text-[10px] text-emerald-600 font-bold">#${l.orderCode}</div>` : ''}
+        </td>
+        <td class="px-4 py-3 text-right whitespace-nowrap">
+          ${!isConverted ? `
+            <button onclick="convertLeadToOrderFast('${l.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 ml-auto transition">
+              <i class="fa-solid fa-cart-plus"></i> Tạo đơn ngay
+            </button>
+          ` : `
+            <span class="text-[11px] text-emerald-700 font-semibold flex items-center justify-end gap-1">
+              <i class="fa-solid fa-check"></i> Đã tạo đơn
+            </span>
+          `}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function updateZaloLeadStatus(leadId, newStatus) {
+  try {
+    const res = await apiFetch(`/api/zalo-bot/leads/${leadId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Đã cập nhật trạng thái khách hàng Zalo!', 'success');
+      loadZaloLeads();
+    }
+  } catch (err) {
+    showToast('Lỗi cập nhật trạng thái', 'error');
+  }
+}
+
+async function convertLeadToOrderFast(leadId) {
+  const lead = zaloLeadsData.find(l => l.id === leadId);
+  if (!lead) return;
+
+  if (!confirm(`Xác nhận chuyển đổi khách hàng [${lead.customerName} - ${lead.customerPhone}] thành Đơn hàng chính thức trong hệ thống OMS?`)) return;
+
+  try {
+    const res = await apiFetch(`/api/zalo-bot/leads/${leadId}/convert-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        shippingFee: 30000,
+        paymentMethod: 'COD'
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`🎉 Đã tạo thành công Đơn hàng #${data.order.code} từ Zalo Lead!`, 'success');
+      await loadOrders();
+      await loadZaloLeads();
+      switchTab('orders');
+    }
+  } catch (err) {
+    showToast('Lỗi khi chuyển đổi đơn hàng', 'error');
+  }
+}
+
+// Zalo Live Chat Simulator
+async function sendSimulatedZaloMessage() {
+  const input = document.getElementById('sim-input-text');
+  if (!input || !input.value.trim()) return;
+
+  const userText = input.value.trim();
+  input.value = '';
+
+  const history = document.getElementById('sim-chat-history');
+  if (!history) return;
+
+  // Append user bubble
+  const userBubble = document.createElement('div');
+  userBubble.className = 'flex items-start justify-end gap-2';
+  userBubble.innerHTML = `
+    <div class="bg-[#0068ff] text-white p-2.5 rounded-2xl rounded-tr-none shadow-xs max-w-[85%] text-[11px] leading-relaxed">
+      ${escapeHtml(userText)}
+    </div>
+  `;
+  history.appendChild(userBubble);
+  history.scrollTop = history.scrollHeight;
+
+  // Append typing indicator
+  const typingBubble = document.createElement('div');
+  typingBubble.id = 'sim-typing-indicator';
+  typingBubble.className = 'flex items-start gap-2';
+  typingBubble.innerHTML = `
+    <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">Bot</div>
+    <div class="bg-white p-2 rounded-2xl rounded-tl-none shadow-xs text-slate-400 text-[10px] flex items-center gap-1">
+      <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 0.2s"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style="animation-delay: 0.4s"></span>
+    </div>
+  `;
+  history.appendChild(typingBubble);
+  history.scrollTop = history.scrollHeight;
+
+  try {
+    const res = await apiFetch('/api/zalo-bot/process-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: userText })
+    });
+    const data = await res.json();
+
+    const typingEl = document.getElementById('sim-typing-indicator');
+    if (typingEl) typingEl.remove();
+
+    if (data.success && data.result) {
+      const resData = data.result;
+      const botBubble = document.createElement('div');
+      botBubble.className = 'flex items-start gap-2';
+      botBubble.innerHTML = `
+        <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">Bot</div>
+        <div class="bg-white p-2.5 rounded-2xl rounded-tl-none shadow-xs max-w-[85%] text-slate-800 text-[11px] whitespace-pre-line leading-relaxed">
+          ${escapeHtml(resData.botReply)}
+        </div>
+      `;
+      history.appendChild(botBubble);
+      history.scrollTop = history.scrollHeight;
+
+      if (resData.leadCaptured && resData.extracted) {
+        const alertBox = document.getElementById('sim-extraction-alert');
+        if (alertBox) {
+          alertBox.classList.remove('hidden');
+          document.getElementById('alert-lead-name').innerText = resData.extracted.name || 'Khách hàng Zalo';
+          document.getElementById('alert-lead-phone').innerText = resData.extracted.phone || '';
+          document.getElementById('alert-lead-address').innerText = resData.extracted.address || 'Chưa cung cấp';
+          document.getElementById('alert-lead-product').innerText = resData.extracted.matchedProduct ? `${resData.extracted.quantity}x ${resData.extracted.matchedProduct.name}` : 'Tư vấn chung';
+        }
+        showToast(`🎉 Đã tự động thu thập SĐT ${resData.extracted.phone} và lưu khách hàng vào OMS!`, 'success');
+        loadZaloLeads();
+        loadCustomers();
+      }
+    }
+  } catch (err) {
+    const typingEl = document.getElementById('sim-typing-indicator');
+    if (typingEl) typingEl.remove();
+    showToast('Lỗi gọi Zalo Bot Simulator', 'error');
+  }
+}
+
+function useSimPreset(text) {
+  const input = document.getElementById('sim-input-text');
+  if (input) {
+    input.value = text;
+    sendSimulatedZaloMessage();
+  }
+}
+
+// Zalo Bot Configuration Management
+async function loadZaloBotConfig() {
+  try {
+    const res = await apiFetch('/api/zalo-bot/config');
+    const data = await res.json();
+    if (data.success && data.config) {
+      const c = data.config;
+      if (document.getElementById('bot-config-enabled')) document.getElementById('bot-config-enabled').checked = c.enabled !== false;
+      if (document.getElementById('bot-config-welcome')) document.getElementById('bot-config-welcome').value = c.welcomeMessage || '';
+      if (document.getElementById('bot-config-lead-success')) document.getElementById('bot-config-lead-success').value = c.leadSuccessMessage || '';
+
+      const tbody = document.getElementById('bot-keywords-tbody');
+      if (tbody) {
+        const keywords = Array.isArray(c.keywords) ? c.keywords : [];
+        tbody.innerHTML = '';
+        keywords.forEach(kw => addBotKeywordRow(kw.keyword, kw.reply));
+      }
+    }
+  } catch (err) {
+    console.error('Lỗi tải cấu hình Zalo Bot:', err);
+  }
+}
+
+function addBotKeywordRow(keyword = '', reply = '') {
+  const tbody = document.getElementById('bot-keywords-tbody');
+  if (!tbody) return;
+
+  const row = document.createElement('tr');
+  row.className = 'hover:bg-slate-50';
+  row.innerHTML = `
+    <td class="p-2">
+      <input type="text" class="bot-kw-input w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-bold text-slate-800" value="${escapeHtml(keyword)}" placeholder="ví dụ: giá, ship, địa chỉ">
+    </td>
+    <td class="p-2">
+      <input type="text" class="bot-reply-input w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-slate-700" value="${escapeHtml(reply)}" placeholder="Câu trả lời của bot...">
+    </td>
+    <td class="p-2 text-center">
+      <button onclick="this.closest('tr').remove()" class="text-rose-500 hover:text-rose-700 text-xs px-2 py-1">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    </td>
+  `;
+  tbody.appendChild(row);
+}
+
+async function saveZaloBotConfig() {
+  const enabled = document.getElementById('bot-config-enabled')?.checked;
+  const welcomeMessage = document.getElementById('bot-config-welcome')?.value.trim();
+  const leadSuccessMessage = document.getElementById('bot-config-lead-success')?.value.trim();
+
+  const keywordRows = document.querySelectorAll('#bot-keywords-tbody tr');
+  const keywords = [];
+  keywordRows.forEach(row => {
+    const kw = row.querySelector('.bot-kw-input')?.value.trim();
+    const rep = row.querySelector('.bot-reply-input')?.value.trim();
+    if (kw && rep) {
+      keywords.push({ keyword: kw, reply: rep });
+    }
+  });
+
+  try {
+    const res = await apiFetch('/api/zalo-bot/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        enabled,
+        welcomeMessage,
+        leadSuccessMessage,
+        keywords
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Đã lưu kịch bản Zalo Bot thành công!', 'success');
+      const indicator = document.getElementById('bot-status-indicator');
+      if (indicator) {
+        if (enabled) {
+          indicator.className = 'text-emerald-300 font-bold flex items-center gap-1';
+          indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Đang hoạt động';
+        } else {
+          indicator.className = 'text-slate-300 font-bold flex items-center gap-1';
+          indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span> Đang tạm tắt';
+        }
+      }
+    }
+  } catch (err) {
+    showToast('Lỗi lưu kịch bản Bot', 'error');
+  }
+}
+
 

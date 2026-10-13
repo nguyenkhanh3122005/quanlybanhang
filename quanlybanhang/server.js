@@ -11,6 +11,7 @@ const queueService = require('./queueService');
 const logisticsService = require('./logisticsService');
 const paymentService = require('./paymentService');
 const backupService = require('./backupService');
+const zaloBotService = require('./zaloBotService');
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -748,6 +749,12 @@ app.get('/api/system/webhook-urls', (req, res) => {
         url: `${baseUrl}/api/webhooks/zns`,
         method: 'POST',
         guide: 'Cấu hình trong trang Zalo for Developers -> Ứng dụng -> Thiết lập Webhook OA.'
+      },
+      zaloOa: {
+        name: 'Webhook Zalo OA Chatbot (Tiếp nhận tin nhắn & Bóc tách thông tin)',
+        url: `${baseUrl}/api/webhooks/zalo-oa`,
+        method: 'POST',
+        guide: 'Cấu hình trong Zalo for Developers -> Webhook -> Sự kiện user_send_text để Chatbot tự động trả lời và bóc tách thông tin khách hàng vào OMS.'
       }
     }
   });
@@ -784,6 +791,153 @@ app.get('/api/reports/download-csv', (req, res) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="zns-oms-don-hang-${Date.now()}.csv"`);
     res.status(200).send(csv);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ==========================================
+// 4. ZALO OA CHATBOT & CUSTOMER LEAD APIS
+// ==========================================
+
+// Webhook chính thức nhận tin nhắn từ Zalo OA API (user_send_text)
+app.post('/api/webhooks/zalo-oa', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const event = payload.event_name || payload.event;
+    const sender = payload.sender || {};
+    const message = payload.message || {};
+
+    const text = message.text || payload.text || '';
+    const senderId = sender.id || payload.user_id_by_app || 'zalo-user';
+    const senderName = sender.name || payload.sender_name || 'Khách hàng Zalo';
+
+    const result = await zaloBotService.processMessage({
+      text,
+      senderId,
+      senderName
+    });
+
+    res.json({
+      success: true,
+      result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    recordSystemError(err, 'POST /api/webhooks/zalo-oa');
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API Xử lý tin nhắn Zalo (Dùng cho cả Webhook và Bộ giả lập Zalo Simulator trong Web UI)
+app.post('/api/zalo-bot/process-message', async (req, res) => {
+  try {
+    const { text, senderName, senderPhone } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ success: false, message: 'Nội dung tin nhắn không được để trống' });
+    }
+
+    const result = await zaloBotService.processMessage({
+      text: text.trim(),
+      senderName: senderName || 'Khách hàng Zalo',
+      senderPhone: senderPhone || null
+    });
+
+    res.json({
+      success: true,
+      result
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Lấy danh sách Khách hàng tiềm năng thu thập từ Zalo OA
+app.get('/api/zalo-bot/leads', (req, res) => {
+  try {
+    const { status, search } = req.query;
+    let leads = db.getZaloLeads();
+
+    if (status && status !== 'all') {
+      leads = leads.filter(l => l.status === status);
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      leads = leads.filter(l =>
+        (l.customerName && l.customerName.toLowerCase().includes(q)) ||
+        (l.customerPhone && l.customerPhone.includes(q)) ||
+        (l.interestedProduct && l.interestedProduct.toLowerCase().includes(q))
+      );
+    }
+
+    res.json({ success: true, leads });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Cập nhật trạng thái Lead (new | contacted | converted | cancelled)
+app.put('/api/zalo-bot/leads/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    const updated = db.updateZaloLead(id, {
+      ...(status && { status }),
+      ...(notes !== undefined && { notes })
+    });
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy Lead' });
+    }
+
+    res.json({ success: true, lead: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Chuyển đổi Lead thành Đơn hàng chính thức trong 1 Click
+app.post('/api/zalo-bot/leads/:id/convert-order', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await zaloBotService.convertLeadToOrder(id, req.body || {});
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Lấy cấu hình Kịch bản Chatbot Zalo
+app.get('/api/zalo-bot/config', (req, res) => {
+  const settings = db.getSettings();
+  res.json({
+    success: true,
+    config: settings.zaloBotConfig || {}
+  });
+});
+
+// Cập nhật cấu hình Kịch bản Chatbot Zalo
+app.put('/api/zalo-bot/config', (req, res) => {
+  try {
+    const settings = db.getSettings();
+    settings.zaloBotConfig = {
+      ...(settings.zaloBotConfig || {}),
+      ...req.body
+    };
+    db.saveSettings(settings);
+
+    auditService.log({
+      user: req.currentUser,
+      entityType: 'ZALO_BOT',
+      entityId: 'CONFIG',
+      action: 'UPDATE_BOT_CONFIG',
+      description: 'Cập nhật kịch bản tự động trả lời & từ khóa Zalo Chatbot',
+      ip: req.ip
+    });
+
+    res.json({ success: true, config: settings.zaloBotConfig });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

@@ -1,0 +1,164 @@
+[
+  {
+    "id": "lead-zalo-1791886458556",
+    "customerName": "Khách hàng Zalo",
+    "customerPhone": "0988665544",
+    "customerAddress": "",
+    "interestedProduct": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "productId": "prod-1",
+    "productPrice": 490000,
+    "quantity": 1,
+    "source": "Zalo OA Chatbot",
+    "messageHistory": [
+      {
+        "sender": "user",
+        "text": "D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�",
+        "time": "2026-10-13T10:14:18.556Z"
+      }
+    ],
+    "status": "new",
+    "notes": "Tự động bóc tách từ Zalo: SĐT: 0988665544 - SP: Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "createdAt": "2026-10-13T10:14:18.557Z"
+  },
+  {
+    "id": "lead-zalo-1791886396411",
+    "customerName": "Khách hàng Zalo",
+    "customerPhone": "0988665544",
+    "customerAddress": "",
+    "interestedProduct": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "productId": "prod-1",
+    "productPrice": 490000,
+    "quantity": 1,
+    "source": "Zalo OA Chatbot",
+    "messageHistory": [
+      {
+        "sender": "user",
+        "text": "D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�",
+        "time": "2026-10-13T10:13:16.411Z"
+      }
+    ],
+    "status": "new",
+    "notes": "Tự động bóc tách từ Zalo: SĐT: 0988665544 - SP: Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "createdAt": "2026-10-13T10:13:16.411Z"
+  },
+  {
+    "id": "lead-zalo-1791886378543",
+    "customerName": "Khách hàng Zalo",
+    "customerPhone": "0988665544",
+    "customerAddress": "",
+    "interestedProduct": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "productId": "prod-1",
+    "productPrice": 490000,
+    "quantity": 1,
+    "source": "Zalo OA Chatbot",
+    "messageHistory": [
+      {
+        "sender": "user",
+        "text": "D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�",
+        "time": "2026-10-13T10:12:58.543Z"
+      }
+    ],
+    "status": "new",
+    "notes": "Tự động bóc tách từ Zalo: SĐT: 0988665544 - SP: Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "createdAt": "2026-10-13T10:12:58.543Z"
+  },
+  {
+    "id": "lead-zalo-101",
+    "customerName": "Nguyễn Thu Hà",
+    "customerPhone": "0987654321",
+    "customerAddress": "Số 28 ngõ 105 Doãn Kế Thiện, Cầu Giấy, Hà Nội",
+    "interestedProduct": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+    "productId": "prod-1",
+    "productPrice": 490000,
+    "quantity": 1,
+    "source": "Zalo OA Chatbot",
+    "messageHistory": [
+      {
+        "sender": "user",
+        "text": "Shop ơi tư vấn cho mình tai nghe bluetooth với, có màu trắng không?",
+        "time": "2026-10-13T14:10:00.000Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Dạ Tai nghe Bluetooth TrueWireless Pro Gen 3 bên em có sẵn màu trắng tinh tế, giá ưu đãi 490.000đ ạ. Bạn để lại SĐT và địa chỉ để shop gửi hàng nhé!",
+        "time": "2026-10-13T14:10:05.000Z"
+      },
+      {
+        "sender": "user",
+        "text": "Mình tên Hà, sđt 0987654321, ship về số 28 ngõ 105 Doãn Kế Thiện, Cầu Giấy giúp mình nhé",
+        "time": "2026-10-13T14:11:30.000Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Dạ em đã lưu thông tin của Chị Hà (SĐT: 0987654321). Chuyên viên CSKH bên em sẽ gọi điện xác nhận và gửi hàng ngay ạ!",
+        "time": "2026-10-13T14:11:32.000Z"
+      }
+    ],
+    "status": "new",
+    "notes": "Đã bóc tách tự động: Tên: Hà, SĐT: 0987654321, SP: Tai nghe Gen 3",
+    "createdAt": "2026-10-13T14:11:30.000Z"
+  },
+  {
+    "id": "lead-zalo-102",
+    "customerName": "Trần Văn Hưng",
+    "customerPhone": "0912345999",
+    "customerAddress": "Tòa nhà Bitexco, Số 2 Hải Triều, Bến Nghé, Quận 1, TP.HCM",
+    "interestedProduct": "Củ sạc nhanh GaN 65W 3 cổng Type-C & USB-A",
+    "productId": "prod-2",
+    "productPrice": 299000,
+    "quantity": 2,
+    "source": "Zalo OA Chatbot",
+    "messageHistory": [
+      {
+        "sender": "user",
+        "text": "Alo shop, củ sạc 65w có sạc được cho Macbook không shop? Mình lấy 2 cái",
+        "time": "2026-10-13T10:20:00.000Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Dạ củ sạc GaN 65W hỗ trợ sạc chuẩn PD cho Macbook và mọi dòng iPhone/Android ạ. Anh/Chị cho shop xin SĐT và Địa chỉ để shop lên đơn nhé!",
+        "time": "2026-10-13T10:20:05.000Z"
+      },
+      {
+        "sender": "user",
+        "text": "Mình là Hưng 0912345999, giao qua Bitexco Q1 giùm mình",
+        "time": "2026-10-13T10:21:00.000Z"
+      }
+    ],
+    "status": "converted",
+    "orderCode": "DH-20261013-0002",
+    "notes": "Khách mua 2 củ sạc nhanh GaN, đã chuyển đổi thành đơn hàng",
+    "createdAt": "2026-10-13T10:21:00.000Z"
+  },
+  {
+    "id": "lead-zalo-103",
+    "customerName": "Hoàng Minh Đức",
+    "customerPhone": "0905123456",
+    "customerAddress": "Hải Châu, Đà Nẵng",
+    "interestedProduct": "Balo Laptop 15.6 inch Chống Thấm Nước",
+    "productId": "prod-4",
+    "productPrice": 385000,
+    "quantity": 1,
+    "source": "Zalo OA Chatbot",
+    "messageHistory": [
+      {
+        "sender": "user",
+        "text": "Balo laptop có chống nước đi mưa to được không bạn? Giá bao nhiêu thế?",
+        "time": "2026-10-13T09:00:00.000Z"
+      },
+      {
+        "sender": "bot",
+        "text": "Dạ Balo Laptop 15.6 inch vải Oxford cao cấp chống nước tuyệt đối, giá ưu đãi 385.000đ. Anh để lại SĐT để shop gửi hình ảnh thực tế nhé!",
+        "time": "2026-10-13T09:00:04.000Z"
+      },
+      {
+        "sender": "user",
+        "text": "Số mình 0905123456 Đức nhé",
+        "time": "2026-10-13T09:02:15.000Z"
+      }
+    ],
+    "status": "contacted",
+    "notes": "Đã gọi điện tư vấn, khách hẹn chiều chốt màu xám",
+    "createdAt": "2026-10-13T09:02:15.000Z"
+  }
+]

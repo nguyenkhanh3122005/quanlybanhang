@@ -76,5 +76,33 @@
     "orderCount": 1,
     "notes": "",
     "createdAt": "2026-10-13T06:39:43.846Z"
+  },
+  {
+    "id": "cust-zalo-1791886378541",
+    "name": "Khách hàng Zalo",
+    "phone": "0988665544",
+    "email": "",
+    "address": "",
+    "city": "",
+    "tier": "Standard",
+    "totalSpent": 0,
+    "orderCount": 0,
+    "source": "Zalo OA Chatbot",
+    "notes": "Khách hàng tự động thu thập từ tin nhắn Zalo: \"D? ch�o shop, m�nh l� Phuong Mai sdt 0988665544 ? 15 Nguy?n Tr�i Thanh Xu�n, l?y cho m�nh 1 tai nghe bluetooth nh�\"",
+    "createdAt": "2026-10-13T10:12:58.542Z"
+  },
+  {
+    "id": "cust-zalo-1791889689427",
+    "name": "Hoàng Long",
+    "phone": "0978123456",
+    "email": "",
+    "address": "số 88 Cầu Giấy HN",
+    "city": "",
+    "tier": "Standard",
+    "totalSpent": 0,
+    "orderCount": 0,
+    "source": "Zalo OA Chatbot",
+    "notes": "Khách hàng tự động thu thập từ tin nhắn Zalo: \"Shop ơi mình là Hoàng Long ở số 88 Cầu Giấy HN, sdt 0978123456. Shop còn áo polo ko ship mình 1 cái nhé\"",
+    "createdAt": "2026-10-13T11:08:09.427Z"
   }
 ]
