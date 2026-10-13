@@ -1,0 +1,41 @@
+{
+  "storeName": "ZNS E-Commerce & Retail Store",
+  "storePhone": "0909123456",
+  "storeEmail": "contact@zns-order.vn",
+  "storeAddress": "123 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+  "bankName": "MB Bank (Quân Đội)",
+  "bankBin": "970422",
+  "bankAccount": "090912345688",
+  "bankOwner": "CONG TY TNHH BAN HANG PRO",
+  "currency": "VND",
+  "invoiceFooterNote": "Cảm ơn Quý khách đã mua sắm! Hàng hóa được đổi trả trong 7 ngày nếu có lỗi từ nhà sản xuất.",
+  "znsSettings": {
+    "mode": "simulation",
+    "oaId": "298192837491823",
+    "appId": "1029384756",
+    "secretKey": "sec_znsexamplekey2026",
+    "accessToken": "zns_token_valid_sample_demo_access_key",
+    "templates": {
+      "orderCreated": {
+        "id": "298370",
+        "name": "Xác nhận tạo đơn hàng thành công",
+        "enabled": true
+      },
+      "orderShipping": {
+        "id": "298371",
+        "name": "Thông báo xuất kho & Giao hàng",
+        "enabled": true
+      },
+      "orderCompleted": {
+        "id": "298372",
+        "name": "Cảm ơn & Giao hàng thành công",
+        "enabled": true
+      },
+      "orderCancelled": {
+        "id": "298373",
+        "name": "Thông báo hủy đơn hàng",
+        "enabled": true
+      }
+    }
+  }
+}

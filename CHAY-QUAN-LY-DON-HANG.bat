@@ -23,17 +23,18 @@ if %errorlevel% neq 0 (
 
 :: [2] Kiem tra thu muc du an va file server.js
 echo [2/5] Kiem tra tep ma nguon server.js...
-if not exist "%~dp0zns-oms\server.js" (
+if exist "%~dp0quanlybanhang\server.js" (
+    cd /d "%~dp0quanlybanhang"
+) else if exist "%~dp0zns-oms\server.js" (
+    cd /d "%~dp0zns-oms"
+) else (
     echo.
-    echo [LOI] Khong tim thay file "server.js" trong thu muc "zns-oms"!
-    echo Duong dan kiem tra: "%~dp0zns-oms\server.js"
+    echo [LOI] Khong tim thay file "server.js" trong thu muc "quanlybanhang" hoac "zns-oms"!
     echo Vui long kiem tra lai cau truc thu muc du an.
     echo.
     pause
     exit /b 1
 )
-
-cd /d "%~dp0zns-oms"
 
 :: [3] Kiem tra thu vien phu thuoc (node_modules)
 echo [3/5] Kiem tra goi thu vien node_modules...

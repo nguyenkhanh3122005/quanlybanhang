@@ -15,11 +15,15 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-// Đường dẫn thư mục mã nguồn zns-oms
-const OMS_DIR = path.join(__dirname, 'zns-oms');
+// Đường dẫn thư mục mã nguồn
+const OMS_DIR = fs.existsSync(path.join(__dirname, 'quanlybanhang', 'server.js'))
+  ? path.join(__dirname, 'quanlybanhang')
+  : fs.existsSync(path.join(__dirname, 'zns-oms', 'server.js'))
+    ? path.join(__dirname, 'zns-oms')
+    : __dirname;
 
 if (!fs.existsSync(OMS_DIR) || !fs.existsSync(path.join(OMS_DIR, 'server.js'))) {
-  console.error('[LỖI] Không tìm thấy thư mục zns-oms hoặc file server.js!');
+  console.error('[LỖI] Không tìm thấy file server.js trong quanlybanhang hoặc zns-oms!');
   console.error('Đường dẫn kiểm tra:', OMS_DIR);
   process.exit(1);
 }
