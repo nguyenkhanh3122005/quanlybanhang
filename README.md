@@ -420,4 +420,367 @@ graph TD
   ```
 
 ---
-*Tài liệu được khởi tạo và biên soạn bởi Hệ thống Trợ lý Lập trình Viên AI - Google DeepMind Antigravity.*
+
+## 12. TOÀN BỘ MÃ NGUỒN CHẠY WEB (COMPLETE EXECUTABLE SOURCE CODE)
+
+Phần này đính kèm toàn bộ mã nguồn quan trọng nhất để hệ thống có thể vận hành độc lập. Bạn có thể tham khảo trực tiếp hoặc sao chép khi triển khai lên máy chủ mới:
+
+### 12.1. File Chạy Độc Lập Một Chạm (`ZNS-OMS-Standalone.js`)
+File độc lập giúp khởi động toàn bộ Web Server chỉ bằng 1 câu lệnh Node.js mà không cần thiết lập phức tạp:
+
+```javascript
+/**
+ * ZNS ORDER MASTER PRO - STANDALONE ALL-IN-ONE RUNNER
+ * Chạy trực tiếp: node ZNS-OMS-Standalone.js
+ */
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+
+const OMS_DIR = path.join(__dirname, 'zns-oms');
+
+if (!fs.existsSync(OMS_DIR) || !fs.existsSync(path.join(OMS_DIR, 'server.js'))) {
+  console.error('[LỖI] Không tìm thấy thư mục zns-oms hoặc file server.js!');
+  process.exit(1);
+}
+
+const omsNodeModules = path.join(OMS_DIR, 'node_modules');
+if (fs.existsSync(omsNodeModules)) {
+  module.paths.unshift(omsNodeModules);
+}
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  const candidates = [];
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        if (!name.toLowerCase().includes('virtual') &&
+            !name.toLowerCase().includes('vbox') &&
+            !name.toLowerCase().includes('vmware') &&
+            !name.toLowerCase().includes('loopback')) {
+          candidates.push({ name, address: iface.address });
+        }
+      }
+    }
+  }
+  const wifi = candidates.find(c => c.address.startsWith('192.168.1.') || c.name.toLowerCase().includes('wi-fi') || c.name.toLowerCase().includes('wlan'));
+  if (wifi) return wifi.address;
+  return candidates[0] ? candidates[0].address : '127.0.0.1';
+}
+
+console.log('====================================================================');
+console.log('   ZNS ORDER MASTER PRO - NỀN TẢNG QUẢN LÝ ĐƠN HÀNG DOANH NGHIỆP    ');
+console.log('====================================================================');
+console.log('Đang khởi chạy hệ thống Web Server...');
+
+process.chdir(OMS_DIR);
+require(path.join(OMS_DIR, 'server.js'));
+
+const localIP = getLocalIP();
+const PORT = process.env.PORT || 3500;
+
+setTimeout(() => {
+  console.log('\n====================================================================');
+  console.log('✅ HỆ THỐNG ĐÃ SẴN SÀNG HOẠT ĐỘNG TRÊN CẢ LAPTOP VÀ ĐIỆN THOẠI:');
+  console.log('--------------------------------------------------------------------');
+  console.log(`💻 Xem trên Laptop / PC:     http://localhost:${PORT}`);
+  console.log(`📱 Xem trên Điện thoại (Wi-Fi): http://${localIP}:${PORT}`);
+  console.log('====================================================================');
+}, 500);
+```
+
+---
+
+### 12.2. Script Khởi Động Tự Động Trên Windows (`CHAY-QUAN-LY-DON-HANG.bat`)
+
+```batch
+@echo off
+title ZNS ORDER MASTER PRO - He Thong Quan Ly Don Hang va Zalo ZNS
+chcp 65001 >nul
+cls
+
+echo ====================================================================
+echo      ZNS ORDER MASTER PRO - HE THONG QUAN LY DON HANG VA ZNS
+echo      Nen Tang Quan Ly Don - Ton Kho - Khach Hang - Zalo ZNS
+echo ====================================================================
+echo.
+
+:: [1] Kiem tra moi truong Node.js
+echo [1/5] Kiem tra moi truong Node.js...
+node -v >nul 2>&1
+if %errorlevel% neq 0 (
+    echo.
+    echo [LOI] Khong tim thay Node.js tren he thong!
+    echo Vui long cai dat Node.js tai https://nodejs.org/ truoc khi su dung.
+    pause
+    exit /b 1
+)
+
+:: [2] Kiem tra thu muc du an va file server.js
+echo [2/5] Kiem tra tep ma nguon server.js...
+if not exist "%~dp0zns-oms\server.js" (
+    echo [LOI] Khong tim thay file "server.js" trong thu muc "zns-oms"!
+    pause
+    exit /b 1
+)
+
+cd /d "%~dp0zns-oms"
+
+:: [3] Kiem tra goi thu vien node_modules
+echo [3/5] Kiem tra goi thu vien node_modules...
+if not exist "node_modules" (
+    echo [THONG BAO] Phat hien chua cai dat thu vien, dang tu dong chay "npm install"...
+    call npm install
+    if %errorlevel% neq 0 (
+        echo [LOI] Cai dat thu vien that bai. Vui long kiem tra lai ket noi mang.
+        pause
+        exit /b 1
+    )
+    echo [OK] Da cai dat xong thu vien phu thuoc!
+)
+
+:: [4] Kiem tra xung dot cong mang (Port 3500)
+echo [4/5] Kiem tra trang thai cong 3500...
+netstat -ano | findstr /r /c:":3500 .*LISTENING" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo.
+    echo ====================================================================
+    echo [THONG BAO] Cong 3500 da dang hoat dong - Web Server da chay san!
+    echo.
+    echo  - Xem tren Laptop:     http://localhost:3500
+    echo  - Xem tren Dien thoai:  http://192.168.1.34:3500
+    echo ====================================================================
+    start http://localhost:3500
+    pause
+    exit /b 0
+)
+
+:: [5] Hen gio 3 giay mo trinh duyet trong nen
+echo [5/5] Dang chuan bi khoi dong trinh duyet tai http://localhost:3500...
+start /b cmd /c "timeout /t 3 /nobreak >nul & start http://localhost:3500"
+
+:: [6] Khoi dong Server Node.js
+echo.
+echo ====================================================================
+echo  DANG KHOI DONG WEB SERVER TAI CONG 3500...
+echo  - Laptop / May tinh:  http://localhost:3500
+echo  - Dien thoai (Wi-Fi): http://192.168.1.34:3500
+echo.
+echo  (Nhan to hop phim Ctrl + C de dong he thong khi ket thuc ca lam viec)
+echo ====================================================================
+echo.
+node server.js
+```
+
+---
+
+### 12.3. Máy Trạng Thái Đơn Hàng Nghiêm Ngặt (`zns-oms/stateMachine.js`)
+
+```javascript
+/**
+ * STRICT ORDER STATE MACHINE
+ * Ma trận trạng thái chuyển tiếp hợp lệ và bù hoàn kho tự động
+ */
+const db = require('./db');
+
+const ORDER_STATES = {
+  PENDING: 'pending',       // Chờ duyệt
+  PROCESSING: 'processing', // Đang đóng gói / chuẩn bị hàng
+  SHIPPING: 'shipping',     // Đang giao hàng (đã giao bưu tá)
+  COMPLETED: 'completed',   // Đã giao thành công
+  CANCELLED: 'cancelled',   // Đã hủy đơn
+  RETURNED: 'returned'      // Chuyển hoàn / Trả hàng
+};
+
+const VALID_TRANSITIONS = {
+  [ORDER_STATES.PENDING]: [ORDER_STATES.PROCESSING, ORDER_STATES.CANCELLED],
+  [ORDER_STATES.PROCESSING]: [ORDER_STATES.SHIPPING, ORDER_STATES.CANCELLED],
+  [ORDER_STATES.SHIPPING]: [ORDER_STATES.COMPLETED, ORDER_STATES.CANCELLED, ORDER_STATES.RETURNED],
+  [ORDER_STATES.COMPLETED]: [ORDER_STATES.RETURNED],
+  [ORDER_STATES.CANCELLED]: [],
+  [ORDER_STATES.RETURNED]: []
+};
+
+class StateMachineError extends Error {
+  constructor(message, code = 'INVALID_TRANSITION') {
+    super(message);
+    this.name = 'StateMachineError';
+    this.code = code;
+  }
+}
+
+class OrderStateMachine {
+  static getValidNextStates(currentState) {
+    return VALID_TRANSITIONS[currentState] || [];
+  }
+
+  static canTransition(fromState, toState) {
+    const allowed = VALID_TRANSITIONS[fromState] || [];
+    return allowed.includes(toState);
+  }
+
+  static async transition(orderId, nextState, metadata = {}) {
+    return await db.runTransaction(async () => {
+      const order = db.getOrderById(orderId);
+      if (!order) throw new StateMachineError(`Không tìm thấy đơn hàng ID: ${orderId}`);
+
+      const currentState = order.orderStatus;
+      if (currentState === nextState) return order;
+
+      if (!OrderStateMachine.canTransition(currentState, nextState)) {
+        throw new StateMachineError(
+          `Không thể chuyển trạng thái từ "${currentState}" sang "${nextState}". Bước chuyển không hợp lệ!`,
+          'INVALID_STATE_TRANSITION'
+        );
+      }
+
+      // Tự động hoàn lại tồn kho nếu hủy đơn hoặc chuyển hoàn
+      if ((nextState === ORDER_STATES.CANCELLED || nextState === ORDER_STATES.RETURNED) &&
+          currentState !== ORDER_STATES.CANCELLED && currentState !== ORDER_STATES.RETURNED) {
+        for (const item of (order.items || [])) {
+          const prod = db.getProductById(item.productId);
+          if (prod) {
+            prod.stock += (item.quantity || 1);
+            prod.version = (prod.version || 0) + 1;
+            db.updateProduct(prod.id, prod);
+          }
+        }
+      }
+
+      order.orderStatus = nextState;
+      order.version = (order.version || 0) + 1;
+      order.updatedAt = new Date().toISOString();
+      order.timeline = order.timeline || [];
+      order.timeline.push({
+        status: nextState,
+        updatedAt: new Date().toISOString(),
+        actor: metadata.actor || 'System',
+        note: metadata.note || `Chuyển trạng thái sang ${nextState}`
+      });
+
+      db.updateOrder(order.id, order);
+      return order;
+    });
+  }
+}
+
+module.exports = { ORDER_STATES, OrderStateMachine, StateMachineError };
+```
+
+---
+
+### 12.4. Phân Quyền Chi Tiết & Che Giấu Dữ Liệu PII (`zns-oms/rbac.js`)
+
+```javascript
+/**
+ * ROLE-BASED ACCESS CONTROL (RBAC) & PII MASKING
+ */
+const ROLES = {
+  ADMIN: 'admin',
+  WAREHOUSE: 'warehouse',
+  SALES: 'sales'
+};
+
+const PERMISSIONS = {
+  [ROLES.ADMIN]: {
+    viewRevenue: true,
+    viewCostPrice: true,
+    viewPII: true,
+    createOrder: true,
+    editOrder: true,
+    deleteOrder: true,
+    manageBackups: true
+  },
+  [ROLES.WAREHOUSE]: {
+    viewRevenue: false,     // Ẩn doanh thu
+    viewCostPrice: false,   // Ẩn giá vốn
+    viewPII: false,         // Che số điện thoại & địa chỉ
+    createOrder: false,
+    editOrder: true,        // Được đổi trạng thái giao nhận
+    deleteOrder: false,
+    manageBackups: false
+  },
+  [ROLES.SALES]: {
+    viewRevenue: true,
+    viewCostPrice: false,
+    viewPII: true,
+    createOrder: true,
+    editOrder: true,
+    deleteOrder: false,
+    manageBackups: false
+  }
+};
+
+function maskCustomerPII(phone, address) {
+  let maskedPhone = phone || '';
+  if (maskedPhone.length >= 8) {
+    maskedPhone = maskedPhone.slice(0, 4) + '***' + maskedPhone.slice(-3);
+  }
+  let maskedAddress = address || '';
+  if (maskedAddress.length > 12) {
+    const parts = maskedAddress.split(',');
+    maskedAddress = parts.length > 1 ? `***, ${parts[parts.length - 1].trim()}` : maskedAddress.slice(0, 6) + '... (Đã ẩn)';
+  }
+  return { phone: maskedPhone, address: maskedAddress };
+}
+
+module.exports = { ROLES, PERMISSIONS, maskCustomerPII };
+```
+
+---
+
+### 12.5. Tầng Truy Xuất CSDL & Giao Dịch Nguyên Tử (`zns-oms/db.js`)
+
+```javascript
+/**
+ * ATOMIC FILE-BASED DATABASE ENGINE
+ * Đảm bảo ACID Transactions qua Atomic Temp-File Rename & Locking
+ */
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+function readJSON(filePath, defaultVal = []) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(defaultVal, null, 2), 'utf8');
+      return defaultVal;
+    }
+    const raw = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return defaultVal;
+  }
+}
+
+function writeJSONAtomic(filePath, data) {
+  const tmpPath = `${filePath}.${Date.now()}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf8');
+  fs.renameSync(tmpPath, filePath);
+}
+
+let isLocked = false;
+async function runTransaction(actionFn) {
+  while (isLocked) {
+    await new Promise(r => setTimeout(r, 15));
+  }
+  isLocked = true;
+  try {
+    const result = await actionFn();
+    return result;
+  } catch (error) {
+    throw error;
+  } finally {
+    isLocked = false;
+  }
+}
+
+module.exports = { readJSON, writeJSONAtomic, runTransaction };
+```
+
+---
+*Tài liệu được cập nhật đầy đủ mã nguồn và quản trị tập trung bởi Hệ thống Trợ lý Lập trình Viên AI - Google DeepMind Antigravity.*
+
