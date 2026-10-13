@@ -1,0 +1,279 @@
+[
+  {
+    "id": "ord-1791873583847",
+    "code": "DH-20261013-0005",
+    "customerId": "cust-1791873583846",
+    "customerName": "Nguy?n Van A",
+    "customerPhone": "0982801051",
+    "customerAddress": "S? nh� 151, An L?c, Trung Gi�, TP.H� N?i",
+    "carrier": "Giao H�ng Nhanh (GHN)",
+    "trackingCode": "",
+    "paymentMethod": "VietQR",
+    "paymentStatus": "unpaid",
+    "orderStatus": "pending",
+    "items": [
+      {
+        "productId": "prod-1",
+        "name": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+        "sku": "SP-TAI-NGHE-01",
+        "price": 490000,
+        "quantity": 1,
+        "total": 490000
+      }
+    ],
+    "subtotal": 490000,
+    "shippingFee": 25000,
+    "discount": 10000,
+    "totalAmount": 505000,
+    "customerNote": "",
+    "staffNote": "",
+    "timeline": [
+      {
+        "status": "pending",
+        "title": "Tạo đơn hàng mới",
+        "desc": "Đơn hàng được tạo thành công với tổng thanh toán 505.000 ₫",
+        "time": "2026-10-13T06:39:43.847Z",
+        "user": "Hệ thống / Thu ngân"
+      },
+      {
+        "status": "pending",
+        "title": "Đã gửi Zalo ZNS",
+        "desc": "Thông báo xác nhận đơn hàng đã được gửi tới số Zalo 0982801051",
+        "time": "2026-10-13T06:39:44.159Z",
+        "user": "ZNS Service"
+      }
+    ],
+    "znsSent": true,
+    "createdAt": "2026-10-13T06:39:43.847Z",
+    "updatedAt": "2026-10-13T06:39:43.847Z"
+  },
+  {
+    "id": "ord-101",
+    "code": "DH-20261013-0001",
+    "customerId": "cust-1",
+    "customerName": "Nguyễn Văn Tuấn",
+    "customerPhone": "0912345678",
+    "customerAddress": "Số 45, Đường Lê Duẩn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+    "carrier": "Giao Hàng Nhanh (GHN)",
+    "trackingCode": "GHN-882910471",
+    "paymentMethod": "COD",
+    "paymentStatus": "paid",
+    "orderStatus": "shipping",
+    "items": [
+      {
+        "productId": "prod-1",
+        "name": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+        "sku": "SP-TAI-NGHE-01",
+        "price": 490000,
+        "quantity": 1,
+        "total": 490000
+      },
+      {
+        "productId": "prod-2",
+        "name": "Củ sạc nhanh GaN 65W 3 cổng Type-C & USB-A",
+        "sku": "SP-SAC-NHANH-65W",
+        "price": 299000,
+        "quantity": 1,
+        "total": 299000
+      }
+    ],
+    "subtotal": 789000,
+    "shippingFee": 30000,
+    "discount": 20000,
+    "totalAmount": 799000,
+    "customerNote": "Giao giờ hành chính giúp em",
+    "staffNote": "Đã bọc chống sốc 2 lớp cẩn thận",
+    "timeline": [
+      {
+        "status": "pending",
+        "title": "Tạo đơn hàng",
+        "desc": "Đơn hàng được tiếp nhận vào hệ thống",
+        "time": "2026-10-12T08:30:00.000Z",
+        "user": "Admin"
+      },
+      {
+        "status": "processing",
+        "title": "Đang đóng gói",
+        "desc": "Kho đã xuất hàng & in phiếu đóng gói",
+        "time": "2026-10-12T09:15:00.000Z",
+        "user": "Kho"
+      },
+      {
+        "status": "shipping",
+        "title": "Bàn giao vận chuyển",
+        "desc": "Đã giao bưu tá GHN lấy hàng (Mã vận đơn: GHN-882910471)",
+        "time": "2026-10-12T14:00:00.000Z",
+        "user": "Admin"
+      },
+      {
+        "status": "shipping",
+        "title": "Tự động khớp tiền chuyển khoản (Bank Webhook)",
+        "desc": "Ngân hàng ghi nhận số tiền 799.000 ₫. Mã giao dịch: FT261013998877. Trạng thái thanh toán đổi sang: ĐÃ THANH TOÁN.",
+        "time": "2026-10-13T06:54:31.650Z",
+        "user": "Payment Webhook Service"
+      }
+    ],
+    "znsSent": true,
+    "createdAt": "2026-10-12T08:30:00.000Z",
+    "updatedAt": "2026-10-12T14:00:00.000Z"
+  },
+  {
+    "id": "ord-102",
+    "code": "DH-20261013-0002",
+    "customerId": "cust-3",
+    "customerName": "Lê Hoàng Nam",
+    "customerPhone": "0903112233",
+    "customerAddress": "128 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP. Hồ Chí Minh",
+    "carrier": "Giao Hàng Tiết Kiệm (GHTK)",
+    "trackingCode": "GHTK-990214881",
+    "paymentMethod": "VietQR",
+    "paymentStatus": "paid",
+    "orderStatus": "completed",
+    "items": [
+      {
+        "productId": "prod-6",
+        "name": "Nồi chiên không dầu điện tử 6.5L Cảm Ứng Thông Minh",
+        "sku": "SP-NOI-CHIEN-KD",
+        "price": 1290000,
+        "quantity": 1,
+        "total": 1290000
+      }
+    ],
+    "subtotal": 1290000,
+    "shippingFee": 0,
+    "discount": 50000,
+    "totalAmount": 1240000,
+    "customerNote": "Gọi trước khi đến 15 phút",
+    "staffNote": "Đã check thanh toán VietQR thành công",
+    "timeline": [
+      {
+        "status": "pending",
+        "title": "Tạo đơn hàng",
+        "desc": "Khách tạo đơn và chuyển khoản VietQR",
+        "time": "2026-10-11T10:00:00.000Z",
+        "user": "System"
+      },
+      {
+        "status": "processing",
+        "title": "Đóng gói hàng",
+        "desc": "Hàng đã kiểm tra dán tem bảo hành",
+        "time": "2026-10-11T11:20:00.000Z",
+        "user": "Kho"
+      },
+      {
+        "status": "shipping",
+        "title": "Đang giao hàng",
+        "desc": "Bưu tá GHTK đang đi phát",
+        "time": "2026-10-11T14:30:00.000Z",
+        "user": "Admin"
+      },
+      {
+        "status": "completed",
+        "title": "Giao thành công",
+        "desc": "Khách đã nhận hàng và ký nhận",
+        "time": "2026-10-12T10:15:00.000Z",
+        "user": "Shipper"
+      }
+    ],
+    "znsSent": true,
+    "createdAt": "2026-10-11T10:00:00.000Z",
+    "updatedAt": "2026-10-12T10:15:00.000Z"
+  },
+  {
+    "id": "ord-103",
+    "code": "DH-20261013-0003",
+    "customerId": "cust-2",
+    "customerName": "Trần Thị Mai Phương",
+    "customerPhone": "0988776655",
+    "customerAddress": "Tầng 8, Tòa nhà Vincom Center, 191 Bà Triệu, Hai Bà Trưng, Hà Nội",
+    "carrier": "Viettel Post",
+    "trackingCode": "VTP-77192804",
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "orderStatus": "processing",
+    "items": [
+      {
+        "productId": "prod-3",
+        "name": "Áo Polo Nam Vải Cotton Thoáng Khí Cao Cấp",
+        "sku": "SP-AO-POLO-NAM",
+        "price": 229000,
+        "quantity": 2,
+        "total": 458000
+      },
+      {
+        "productId": "prod-5",
+        "name": "Serum Phục Hồi Da Hyaluronic B5 Cấp Ẩm 30ml",
+        "sku": "SP-SERUM-B5",
+        "price": 260000,
+        "quantity": 1,
+        "total": 260000
+      }
+    ],
+    "subtotal": 718000,
+    "shippingFee": 25000,
+    "discount": 0,
+    "totalAmount": 743000,
+    "customerNote": "Lấy 2 áo màu Xanh Navy size L",
+    "staffNote": "Đang xếp hàng chờ Viettel Post lấy hàng lúc 16h",
+    "timeline": [
+      {
+        "status": "pending",
+        "title": "Tạo đơn hàng",
+        "desc": "Tiếp nhận đơn từ website",
+        "time": "2026-10-13T07:45:00.000Z",
+        "user": "Admin"
+      },
+      {
+        "status": "processing",
+        "title": "Đang xử lý & đóng gói",
+        "desc": "Kho đã in phiếu đóng hàng",
+        "time": "2026-10-13T09:00:00.000Z",
+        "user": "Kho"
+      }
+    ],
+    "znsSent": true,
+    "createdAt": "2026-10-13T07:45:00.000Z",
+    "updatedAt": "2026-10-13T09:00:00.000Z"
+  },
+  {
+    "id": "ord-104",
+    "code": "DH-20261013-0004",
+    "customerId": "cust-4",
+    "customerName": "Phạm Thu Trang",
+    "customerPhone": "0977224466",
+    "customerAddress": "Số 15 ngõ 98 Xuân Thủy, Cầu Giấy, Hà Nội",
+    "carrier": "Shopee Xpress",
+    "trackingCode": "",
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "orderStatus": "pending",
+    "items": [
+      {
+        "productId": "prod-4",
+        "name": "Balo Laptop 15.6 inch Chống Thấm Nước Có Cổng Sạc",
+        "sku": "SP-BALO-CHONG-NUOC",
+        "price": 385000,
+        "quantity": 1,
+        "total": 385000
+      }
+    ],
+    "subtotal": 385000,
+    "shippingFee": 30000,
+    "discount": 0,
+    "totalAmount": 415000,
+    "customerNote": "",
+    "staffNote": "Chờ gọi xác nhận địa chỉ cụ thể",
+    "timeline": [
+      {
+        "status": "pending",
+        "title": "Đơn mới tạo",
+        "desc": "Chờ nhân viên duyệt đơn",
+        "time": "2026-10-13T11:15:00.000Z",
+        "user": "System"
+      }
+    ],
+    "znsSent": false,
+    "createdAt": "2026-10-13T11:15:00.000Z",
+    "updatedAt": "2026-10-13T11:15:00.000Z"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cat-1",
+    "name": "Đồ Điện Tử & Công Nghệ",
+    "code": "TECH",
+    "description": "Phụ kiện, thiết bị điện tử, đồ thông minh"
+  },
+  {
+    "id": "cat-2",
+    "name": "Thời Trang & Phụ Kiện",
+    "code": "FASHION",
+    "description": "Quần áo, giày dép, phụ kiện nam nữ"
+  },
+  {
+    "id": "cat-3",
+    "name": "Mỹ Phẩm & Chăm Sóc",
+    "code": "BEAUTY",
+    "description": "Chăm sóc da, mỹ phẩm, nước hoa chính hãng"
+  },
+  {
+    "id": "cat-4",
+    "name": "Gia Dụng & Đời Sống",
+    "code": "HOME",
+    "description": "Đồ gia dụng, tiện ích gia đình"
+  }
+]

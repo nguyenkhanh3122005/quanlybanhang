@@ -1,0 +1,50 @@
+[
+  {
+    "id": "aud-1791874861171-975j",
+    "timestamp": "2026-10-13T07:01:01.171Z",
+    "user": {
+      "id": "usr-admin-1",
+      "name": "Nguyễn Quản Trị (Chủ Shop)",
+      "role": "admin"
+    },
+    "entityType": "INVENTORY",
+    "entityId": "CSV_IMPORT",
+    "action": "STOCK_ADJUSTMENT",
+    "description": "Nhập khẩu 2 sản phẩm từ file CSV",
+    "changes": [],
+    "reason": "",
+    "ip": "::1"
+  },
+  {
+    "id": "aud-1791874850392-2h7h",
+    "timestamp": "2026-10-13T07:00:50.392Z",
+    "user": {
+      "id": "usr-admin-1",
+      "name": "Nguyễn Quản Trị (Chủ Shop)",
+      "role": "admin"
+    },
+    "entityType": "SYSTEM",
+    "entityId": "snapshot_2026-10-13T07-00-50-339Z",
+    "action": "DATABASE_BACKUP",
+    "description": "Tạo bản snapshot sao lưu: snapshot_2026-10-13T07-00-50-339Z.json (21.34 KB)",
+    "changes": [],
+    "reason": "",
+    "ip": "::1"
+  },
+  {
+    "id": "aud-1791874471653-s5kc",
+    "timestamp": "2026-10-13T06:54:31.654Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Bank Webhook",
+      "role": "webhook"
+    },
+    "entityType": "PAYMENT",
+    "entityId": "DH-20261013-0001",
+    "action": "PAYMENT_RECEIVED",
+    "description": "Tự động khớp lệnh thanh toán 799.000 ₫ từ tài khoản 090912345688",
+    "changes": [],
+    "reason": "",
+    "ip": "::1"
+  }
+]

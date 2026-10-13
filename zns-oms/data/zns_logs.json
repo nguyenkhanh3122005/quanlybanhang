@@ -1,0 +1,74 @@
+[
+  {
+    "id": "log-zns-1791873583955",
+    "orderId": "ord-1791873583847",
+    "orderCode": "DH-20261013-0005",
+    "phone": "0982801051",
+    "zaloPhone": "84982801051",
+    "customerName": "Nguy?n Van A",
+    "templateId": "298370",
+    "templateTitle": "XÁC NHẬN ĐẶT HÀNG THÀNH CÔNG",
+    "status": "sent",
+    "mode": "simulation",
+    "cost": 180,
+    "sentAt": "2026-10-13T06:39:43.955Z",
+    "messagePreview": "Kính gửi Quý khách Nguy?n Van A,\n\nĐơn hàng #DH-20261013-0005 của bạn đã được ghi nhận thành công trên hệ thống ZNS E-Commerce & Retail Store.\n\n• Tổng thanh toán: 505.000 ₫\n• Phương thức: VietQR\n• Địa chỉ nhận: S? nh� 151, An L?c, Trung Gi�, TP.H� N?i\n\nChúng tôi đang xử lý đóng gói và sẽ gửi thông tin vận chuyển đến bạn trong thời gian sớm nhất. Xin chân thành cảm ơn!",
+    "templateData": {
+      "customer_name": "Nguy?n Van A",
+      "order_code": "DH-20261013-0005",
+      "order_date": "13:39 13/10/2026",
+      "total_amount": "505.000 ₫",
+      "payment_status": "Chưa thanh toán (COD)"
+    },
+    "apiResponse": {
+      "error": 0,
+      "message": "Success (ZNS Sandbox Mode - Mô phỏng thành công)",
+      "data": {
+        "msg_id": "sim_msg_5flhx95i",
+        "sent_time": 1791873584157
+      }
+    }
+  },
+  {
+    "id": "log-zns-1",
+    "orderId": "ord-101",
+    "orderCode": "DH-20261013-0001",
+    "phone": "0912345678",
+    "customerName": "Nguyễn Văn Tuấn",
+    "templateId": "298371",
+    "templateTitle": "Thông báo xuất kho & Đang giao hàng",
+    "status": "sent",
+    "mode": "simulation",
+    "cost": 180,
+    "sentAt": "2026-10-12T14:02:15.000Z",
+    "messagePreview": "Xin chào Nguyễn Văn Tuấn, đơn hàng #DH-20261013-0001 của bạn đã được xuất kho và giao cho GHN (Mã vận đơn: GHN-882910471). Dự kiến giao trong 1-2 ngày tới. Cảm ơn bạn đã mua sắm!"
+  },
+  {
+    "id": "log-zns-2",
+    "orderId": "ord-102",
+    "orderCode": "DH-20261013-0002",
+    "phone": "0903112233",
+    "customerName": "Lê Hoàng Nam",
+    "templateId": "298372",
+    "templateTitle": "Xác nhận đơn hàng & Thanh toán thành công",
+    "status": "sent",
+    "mode": "simulation",
+    "cost": 200,
+    "sentAt": "2026-10-11T10:02:00.000Z",
+    "messagePreview": "Kính gửi Lê Hoàng Nam, đơn hàng #DH-20261013-0002 trị giá 1,240,000đ đã được xác nhận thanh toán thành công qua VietQR. Chúng tôi đang đóng gói gửi bạn sớm nhất!"
+  },
+  {
+    "id": "log-zns-3",
+    "orderId": "ord-103",
+    "orderCode": "DH-20261013-0003",
+    "phone": "0988776655",
+    "customerName": "Trần Thị Mai Phương",
+    "templateId": "298370",
+    "templateTitle": "Tiếp nhận đơn hàng mới",
+    "status": "sent",
+    "mode": "simulation",
+    "cost": 180,
+    "sentAt": "2026-10-13T07:46:10.000Z",
+    "messagePreview": "Cảm ơn Trần Thị Mai Phương đã đặt hàng tại ZNS Order Master. Mã đơn: #DH-20261013-0003, Tổng tiền: 743,000đ. Nhân viên sẽ liên hệ đóng gói ngay!"
+  }
+]

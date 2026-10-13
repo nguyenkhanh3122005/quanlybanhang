@@ -1,0 +1,25 @@
+{
+  "name": "zns-oms",
+  "version": "1.0.0",
+  "description": "ZNS Order Master - Hệ thống Quản trị Đơn hàng & Tích hợp Zalo ZNS Toàn diện",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "order-management",
+    "oms",
+    "zns",
+    "zalo",
+    "pos",
+    "inventory"
+  ],
+  "author": "Google DeepMind & Developer",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  }
+}

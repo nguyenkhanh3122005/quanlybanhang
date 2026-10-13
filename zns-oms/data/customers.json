@@ -1,0 +1,80 @@
+[
+  {
+    "id": "cust-1",
+    "name": "Nguyễn Văn Tuấn",
+    "phone": "0912345678",
+    "email": "tuan.nguyen@gmail.com",
+    "address": "Số 45, Đường Lê Duẩn, Phường Bến Nghé, Quận 1",
+    "city": "TP. Hồ Chí Minh",
+    "tier": "Gold",
+    "totalSpent": 4250000,
+    "orderCount": 5,
+    "notes": "Khách VIP, thường nhận hàng giờ hành chính",
+    "createdAt": "2026-09-15T09:00:00.000Z"
+  },
+  {
+    "id": "cust-2",
+    "name": "Trần Thị Mai Phương",
+    "phone": "0988776655",
+    "email": "phuong.tran88@gmail.com",
+    "address": "Tầng 8, Tòa nhà Vincom Center, 191 Bà Triệu, Hai Bà Trưng",
+    "city": "Hà Nội",
+    "tier": "Silver",
+    "totalSpent": 1950000,
+    "orderCount": 3,
+    "notes": "Ưu tiên gọi điện trước khi giao hàng",
+    "createdAt": "2026-09-20T10:30:00.000Z"
+  },
+  {
+    "id": "cust-3",
+    "name": "Lê Hoàng Nam",
+    "phone": "0903112233",
+    "email": "nam.lehoang@gmail.com",
+    "address": "128 Nguyễn Thị Minh Khai, Phường 6, Quận 3",
+    "city": "TP. Hồ Chí Minh",
+    "tier": "Platinum",
+    "totalSpent": 8750000,
+    "orderCount": 8,
+    "notes": "Khách hay thanh toán chuyển khoản trước",
+    "createdAt": "2026-09-01T08:15:00.000Z"
+  },
+  {
+    "id": "cust-4",
+    "name": "Phạm Thu Trang",
+    "phone": "0977224466",
+    "email": "trang.pham22@outlook.com",
+    "address": "Số 15 ngõ 98 Xuân Thủy, Cầu Giấy",
+    "city": "Hà Nội",
+    "tier": "Standard",
+    "totalSpent": 490000,
+    "orderCount": 1,
+    "notes": "Khách mới từ kênh TikTok Shop",
+    "createdAt": "2026-10-10T11:20:00.000Z"
+  },
+  {
+    "id": "cust-5",
+    "name": "Đặng Quốc Bảo",
+    "phone": "0934556677",
+    "email": "bao.dang@yahoo.com",
+    "address": "254 Hùng Vương, Phường Vĩnh Trung, Quận Thanh Khê",
+    "city": "Đà Nẵng",
+    "tier": "Silver",
+    "totalSpent": 2150000,
+    "orderCount": 2,
+    "notes": "",
+    "createdAt": "2026-10-05T14:00:00.000Z"
+  },
+  {
+    "id": "cust-1791873583846",
+    "name": "Nguy?n Van A",
+    "phone": "0982801051",
+    "email": "",
+    "address": "S? nh� 151, An L?c, Trung Gi�, TP.H� N?i",
+    "city": "",
+    "tier": "Standard",
+    "totalSpent": 505000,
+    "orderCount": 1,
+    "notes": "",
+    "createdAt": "2026-10-13T06:39:43.846Z"
+  }
+]

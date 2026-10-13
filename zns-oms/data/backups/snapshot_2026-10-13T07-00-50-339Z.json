@@ -1,0 +1,610 @@
+{
+  "version": "1.2.0",
+  "createdAt": "2026-10-13T07:00:50.342Z",
+  "label": "Backup Kiem Thu He Thong",
+  "data": {
+    "orders": [
+      {
+        "id": "ord-1791873583847",
+        "code": "DH-20261013-0005",
+        "customerId": "cust-1791873583846",
+        "customerName": "Nguy?n Van A",
+        "customerPhone": "0982801051",
+        "customerAddress": "S? nh� 151, An L?c, Trung Gi�, TP.H� N?i",
+        "carrier": "Giao H�ng Nhanh (GHN)",
+        "trackingCode": "",
+        "paymentMethod": "VietQR",
+        "paymentStatus": "unpaid",
+        "orderStatus": "pending",
+        "items": [
+          {
+            "productId": "prod-1",
+            "name": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+            "sku": "SP-TAI-NGHE-01",
+            "price": 490000,
+            "quantity": 1,
+            "total": 490000
+          }
+        ],
+        "subtotal": 490000,
+        "shippingFee": 25000,
+        "discount": 10000,
+        "totalAmount": 505000,
+        "customerNote": "",
+        "staffNote": "",
+        "timeline": [
+          {
+            "status": "pending",
+            "title": "Tạo đơn hàng mới",
+            "desc": "Đơn hàng được tạo thành công với tổng thanh toán 505.000 ₫",
+            "time": "2026-10-13T06:39:43.847Z",
+            "user": "Hệ thống / Thu ngân"
+          },
+          {
+            "status": "pending",
+            "title": "Đã gửi Zalo ZNS",
+            "desc": "Thông báo xác nhận đơn hàng đã được gửi tới số Zalo 0982801051",
+            "time": "2026-10-13T06:39:44.159Z",
+            "user": "ZNS Service"
+          }
+        ],
+        "znsSent": true,
+        "createdAt": "2026-10-13T06:39:43.847Z",
+        "updatedAt": "2026-10-13T06:39:43.847Z"
+      },
+      {
+        "id": "ord-101",
+        "code": "DH-20261013-0001",
+        "customerId": "cust-1",
+        "customerName": "Nguyễn Văn Tuấn",
+        "customerPhone": "0912345678",
+        "customerAddress": "Số 45, Đường Lê Duẩn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+        "carrier": "Giao Hàng Nhanh (GHN)",
+        "trackingCode": "GHN-882910471",
+        "paymentMethod": "COD",
+        "paymentStatus": "paid",
+        "orderStatus": "shipping",
+        "items": [
+          {
+            "productId": "prod-1",
+            "name": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+            "sku": "SP-TAI-NGHE-01",
+            "price": 490000,
+            "quantity": 1,
+            "total": 490000
+          },
+          {
+            "productId": "prod-2",
+            "name": "Củ sạc nhanh GaN 65W 3 cổng Type-C & USB-A",
+            "sku": "SP-SAC-NHANH-65W",
+            "price": 299000,
+            "quantity": 1,
+            "total": 299000
+          }
+        ],
+        "subtotal": 789000,
+        "shippingFee": 30000,
+        "discount": 20000,
+        "totalAmount": 799000,
+        "customerNote": "Giao giờ hành chính giúp em",
+        "staffNote": "Đã bọc chống sốc 2 lớp cẩn thận",
+        "timeline": [
+          {
+            "status": "pending",
+            "title": "Tạo đơn hàng",
+            "desc": "Đơn hàng được tiếp nhận vào hệ thống",
+            "time": "2026-10-12T08:30:00.000Z",
+            "user": "Admin"
+          },
+          {
+            "status": "processing",
+            "title": "Đang đóng gói",
+            "desc": "Kho đã xuất hàng & in phiếu đóng gói",
+            "time": "2026-10-12T09:15:00.000Z",
+            "user": "Kho"
+          },
+          {
+            "status": "shipping",
+            "title": "Bàn giao vận chuyển",
+            "desc": "Đã giao bưu tá GHN lấy hàng (Mã vận đơn: GHN-882910471)",
+            "time": "2026-10-12T14:00:00.000Z",
+            "user": "Admin"
+          },
+          {
+            "status": "shipping",
+            "title": "Tự động khớp tiền chuyển khoản (Bank Webhook)",
+            "desc": "Ngân hàng ghi nhận số tiền 799.000 ₫. Mã giao dịch: FT261013998877. Trạng thái thanh toán đổi sang: ĐÃ THANH TOÁN.",
+            "time": "2026-10-13T06:54:31.650Z",
+            "user": "Payment Webhook Service"
+          }
+        ],
+        "znsSent": true,
+        "createdAt": "2026-10-12T08:30:00.000Z",
+        "updatedAt": "2026-10-12T14:00:00.000Z"
+      },
+      {
+        "id": "ord-102",
+        "code": "DH-20261013-0002",
+        "customerId": "cust-3",
+        "customerName": "Lê Hoàng Nam",
+        "customerPhone": "0903112233",
+        "customerAddress": "128 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP. Hồ Chí Minh",
+        "carrier": "Giao Hàng Tiết Kiệm (GHTK)",
+        "trackingCode": "GHTK-990214881",
+        "paymentMethod": "VietQR",
+        "paymentStatus": "paid",
+        "orderStatus": "completed",
+        "items": [
+          {
+            "productId": "prod-6",
+            "name": "Nồi chiên không dầu điện tử 6.5L Cảm Ứng Thông Minh",
+            "sku": "SP-NOI-CHIEN-KD",
+            "price": 1290000,
+            "quantity": 1,
+            "total": 1290000
+          }
+        ],
+        "subtotal": 1290000,
+        "shippingFee": 0,
+        "discount": 50000,
+        "totalAmount": 1240000,
+        "customerNote": "Gọi trước khi đến 15 phút",
+        "staffNote": "Đã check thanh toán VietQR thành công",
+        "timeline": [
+          {
+            "status": "pending",
+            "title": "Tạo đơn hàng",
+            "desc": "Khách tạo đơn và chuyển khoản VietQR",
+            "time": "2026-10-11T10:00:00.000Z",
+            "user": "System"
+          },
+          {
+            "status": "processing",
+            "title": "Đóng gói hàng",
+            "desc": "Hàng đã kiểm tra dán tem bảo hành",
+            "time": "2026-10-11T11:20:00.000Z",
+            "user": "Kho"
+          },
+          {
+            "status": "shipping",
+            "title": "Đang giao hàng",
+            "desc": "Bưu tá GHTK đang đi phát",
+            "time": "2026-10-11T14:30:00.000Z",
+            "user": "Admin"
+          },
+          {
+            "status": "completed",
+            "title": "Giao thành công",
+            "desc": "Khách đã nhận hàng và ký nhận",
+            "time": "2026-10-12T10:15:00.000Z",
+            "user": "Shipper"
+          }
+        ],
+        "znsSent": true,
+        "createdAt": "2026-10-11T10:00:00.000Z",
+        "updatedAt": "2026-10-12T10:15:00.000Z"
+      },
+      {
+        "id": "ord-103",
+        "code": "DH-20261013-0003",
+        "customerId": "cust-2",
+        "customerName": "Trần Thị Mai Phương",
+        "customerPhone": "0988776655",
+        "customerAddress": "Tầng 8, Tòa nhà Vincom Center, 191 Bà Triệu, Hai Bà Trưng, Hà Nội",
+        "carrier": "Viettel Post",
+        "trackingCode": "VTP-77192804",
+        "paymentMethod": "COD",
+        "paymentStatus": "unpaid",
+        "orderStatus": "processing",
+        "items": [
+          {
+            "productId": "prod-3",
+            "name": "Áo Polo Nam Vải Cotton Thoáng Khí Cao Cấp",
+            "sku": "SP-AO-POLO-NAM",
+            "price": 229000,
+            "quantity": 2,
+            "total": 458000
+          },
+          {
+            "productId": "prod-5",
+            "name": "Serum Phục Hồi Da Hyaluronic B5 Cấp Ẩm 30ml",
+            "sku": "SP-SERUM-B5",
+            "price": 260000,
+            "quantity": 1,
+            "total": 260000
+          }
+        ],
+        "subtotal": 718000,
+        "shippingFee": 25000,
+        "discount": 0,
+        "totalAmount": 743000,
+        "customerNote": "Lấy 2 áo màu Xanh Navy size L",
+        "staffNote": "Đang xếp hàng chờ Viettel Post lấy hàng lúc 16h",
+        "timeline": [
+          {
+            "status": "pending",
+            "title": "Tạo đơn hàng",
+            "desc": "Tiếp nhận đơn từ website",
+            "time": "2026-10-13T07:45:00.000Z",
+            "user": "Admin"
+          },
+          {
+            "status": "processing",
+            "title": "Đang xử lý & đóng gói",
+            "desc": "Kho đã in phiếu đóng hàng",
+            "time": "2026-10-13T09:00:00.000Z",
+            "user": "Kho"
+          }
+        ],
+        "znsSent": true,
+        "createdAt": "2026-10-13T07:45:00.000Z",
+        "updatedAt": "2026-10-13T09:00:00.000Z"
+      },
+      {
+        "id": "ord-104",
+        "code": "DH-20261013-0004",
+        "customerId": "cust-4",
+        "customerName": "Phạm Thu Trang",
+        "customerPhone": "0977224466",
+        "customerAddress": "Số 15 ngõ 98 Xuân Thủy, Cầu Giấy, Hà Nội",
+        "carrier": "Shopee Xpress",
+        "trackingCode": "",
+        "paymentMethod": "COD",
+        "paymentStatus": "unpaid",
+        "orderStatus": "pending",
+        "items": [
+          {
+            "productId": "prod-4",
+            "name": "Balo Laptop 15.6 inch Chống Thấm Nước Có Cổng Sạc",
+            "sku": "SP-BALO-CHONG-NUOC",
+            "price": 385000,
+            "quantity": 1,
+            "total": 385000
+          }
+        ],
+        "subtotal": 385000,
+        "shippingFee": 30000,
+        "discount": 0,
+        "totalAmount": 415000,
+        "customerNote": "",
+        "staffNote": "Chờ gọi xác nhận địa chỉ cụ thể",
+        "timeline": [
+          {
+            "status": "pending",
+            "title": "Đơn mới tạo",
+            "desc": "Chờ nhân viên duyệt đơn",
+            "time": "2026-10-13T11:15:00.000Z",
+            "user": "System"
+          }
+        ],
+        "znsSent": false,
+        "createdAt": "2026-10-13T11:15:00.000Z",
+        "updatedAt": "2026-10-13T11:15:00.000Z"
+      }
+    ],
+    "customers": [
+      {
+        "id": "cust-1",
+        "name": "Nguyễn Văn Tuấn",
+        "phone": "0912345678",
+        "email": "tuan.nguyen@gmail.com",
+        "address": "Số 45, Đường Lê Duẩn, Phường Bến Nghé, Quận 1",
+        "city": "TP. Hồ Chí Minh",
+        "tier": "Gold",
+        "totalSpent": 4250000,
+        "orderCount": 5,
+        "notes": "Khách VIP, thường nhận hàng giờ hành chính",
+        "createdAt": "2026-09-15T09:00:00.000Z"
+      },
+      {
+        "id": "cust-2",
+        "name": "Trần Thị Mai Phương",
+        "phone": "0988776655",
+        "email": "phuong.tran88@gmail.com",
+        "address": "Tầng 8, Tòa nhà Vincom Center, 191 Bà Triệu, Hai Bà Trưng",
+        "city": "Hà Nội",
+        "tier": "Silver",
+        "totalSpent": 1950000,
+        "orderCount": 3,
+        "notes": "Ưu tiên gọi điện trước khi giao hàng",
+        "createdAt": "2026-09-20T10:30:00.000Z"
+      },
+      {
+        "id": "cust-3",
+        "name": "Lê Hoàng Nam",
+        "phone": "0903112233",
+        "email": "nam.lehoang@gmail.com",
+        "address": "128 Nguyễn Thị Minh Khai, Phường 6, Quận 3",
+        "city": "TP. Hồ Chí Minh",
+        "tier": "Platinum",
+        "totalSpent": 8750000,
+        "orderCount": 8,
+        "notes": "Khách hay thanh toán chuyển khoản trước",
+        "createdAt": "2026-09-01T08:15:00.000Z"
+      },
+      {
+        "id": "cust-4",
+        "name": "Phạm Thu Trang",
+        "phone": "0977224466",
+        "email": "trang.pham22@outlook.com",
+        "address": "Số 15 ngõ 98 Xuân Thủy, Cầu Giấy",
+        "city": "Hà Nội",
+        "tier": "Standard",
+        "totalSpent": 490000,
+        "orderCount": 1,
+        "notes": "Khách mới từ kênh TikTok Shop",
+        "createdAt": "2026-10-10T11:20:00.000Z"
+      },
+      {
+        "id": "cust-5",
+        "name": "Đặng Quốc Bảo",
+        "phone": "0934556677",
+        "email": "bao.dang@yahoo.com",
+        "address": "254 Hùng Vương, Phường Vĩnh Trung, Quận Thanh Khê",
+        "city": "Đà Nẵng",
+        "tier": "Silver",
+        "totalSpent": 2150000,
+        "orderCount": 2,
+        "notes": "",
+        "createdAt": "2026-10-05T14:00:00.000Z"
+      },
+      {
+        "id": "cust-1791873583846",
+        "name": "Nguy?n Van A",
+        "phone": "0982801051",
+        "email": "",
+        "address": "S? nh� 151, An L?c, Trung Gi�, TP.H� N?i",
+        "city": "",
+        "tier": "Standard",
+        "totalSpent": 505000,
+        "orderCount": 1,
+        "notes": "",
+        "createdAt": "2026-10-13T06:39:43.846Z"
+      }
+    ],
+    "products": [
+      {
+        "id": "prod-1",
+        "sku": "SP-TAI-NGHE-01",
+        "barcode": "893850123001",
+        "name": "Tai nghe Bluetooth Không dây TrueWireless Pro Gen 3",
+        "categoryId": "cat-1",
+        "categoryName": "Đồ Điện Tử & Công Nghệ",
+        "costPrice": 280000,
+        "salePrice": 490000,
+        "stock": 44,
+        "minStock": 10,
+        "unit": "Chiếc",
+        "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&auto=format&fit=crop&q=80",
+        "status": "active",
+        "createdAt": "2026-10-01T08:00:00.000Z"
+      },
+      {
+        "id": "prod-2",
+        "sku": "SP-SAC-NHANH-65W",
+        "barcode": "893850123002",
+        "name": "Củ sạc nhanh GaN 65W 3 cổng Type-C & USB-A",
+        "categoryId": "cat-1",
+        "categoryName": "Đồ Điện Tử & Công Nghệ",
+        "costPrice": 160000,
+        "salePrice": 299000,
+        "stock": 78,
+        "minStock": 15,
+        "unit": "Chiếc",
+        "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&auto=format&fit=crop&q=80",
+        "status": "active",
+        "createdAt": "2026-10-02T09:30:00.000Z"
+      },
+      {
+        "id": "prod-3",
+        "sku": "SP-AO-POLO-NAM",
+        "barcode": "893850123003",
+        "name": "Áo Polo Nam Vải Cotton Thoáng Khí Cao Cấp",
+        "categoryId": "cat-2",
+        "categoryName": "Thời Trang & Phụ Kiện",
+        "costPrice": 110000,
+        "salePrice": 229000,
+        "stock": 120,
+        "minStock": 20,
+        "unit": "Cái",
+        "image": "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&auto=format&fit=crop&q=80",
+        "status": "active",
+        "createdAt": "2026-10-03T10:15:00.000Z"
+      },
+      {
+        "id": "prod-4",
+        "sku": "SP-BALO-CHONG-NUOC",
+        "barcode": "893850123004",
+        "name": "Balo Laptop 15.6 inch Chống Thấm Nước Có Cổng Sạc",
+        "categoryId": "cat-2",
+        "categoryName": "Thời Trang & Phụ Kiện",
+        "costPrice": 210000,
+        "salePrice": 385000,
+        "stock": 8,
+        "minStock": 10,
+        "unit": "Cái",
+        "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&auto=format&fit=crop&q=80",
+        "status": "active",
+        "createdAt": "2026-10-04T11:00:00.000Z"
+      },
+      {
+        "id": "prod-5",
+        "sku": "SP-SERUM-B5",
+        "barcode": "893850123005",
+        "name": "Serum Phục Hồi Da Hyaluronic B5 Cấp Ẩm 30ml",
+        "categoryId": "cat-3",
+        "categoryName": "Mỹ Phẩm & Chăm Sóc",
+        "costPrice": 145000,
+        "salePrice": 260000,
+        "stock": 64,
+        "minStock": 12,
+        "unit": "Lọ",
+        "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&auto=format&fit=crop&q=80",
+        "status": "active",
+        "createdAt": "2026-10-05T14:20:00.000Z"
+      },
+      {
+        "id": "prod-6",
+        "sku": "SP-NOI-CHIEN-KD",
+        "barcode": "893850123006",
+        "name": "Nồi chiên không dầu điện tử 6.5L Cảm Ứng Thông Minh",
+        "categoryId": "cat-4",
+        "categoryName": "Gia Dụng & Đời Sống",
+        "costPrice": 750000,
+        "salePrice": 1290000,
+        "stock": 5,
+        "minStock": 8,
+        "unit": "Chiếc",
+        "image": "https://images.unsplash.com/photo-1584269600519-112d071b35e6?w=400&auto=format&fit=crop&q=80",
+        "status": "active",
+        "createdAt": "2026-10-06T15:45:00.000Z"
+      }
+    ],
+    "categories": [
+      {
+        "id": "cat-1",
+        "name": "Đồ Điện Tử & Công Nghệ",
+        "code": "TECH",
+        "description": "Phụ kiện, thiết bị điện tử, đồ thông minh"
+      },
+      {
+        "id": "cat-2",
+        "name": "Thời Trang & Phụ Kiện",
+        "code": "FASHION",
+        "description": "Quần áo, giày dép, phụ kiện nam nữ"
+      },
+      {
+        "id": "cat-3",
+        "name": "Mỹ Phẩm & Chăm Sóc",
+        "code": "BEAUTY",
+        "description": "Chăm sóc da, mỹ phẩm, nước hoa chính hãng"
+      },
+      {
+        "id": "cat-4",
+        "name": "Gia Dụng & Đời Sống",
+        "code": "HOME",
+        "description": "Đồ gia dụng, tiện ích gia đình"
+      }
+    ],
+    "settings": {
+      "storeName": "ZNS E-Commerce & Retail Store",
+      "storePhone": "0909123456",
+      "storeEmail": "contact@zns-order.vn",
+      "storeAddress": "123 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+      "bankName": "MB Bank (Quân Đội)",
+      "bankBin": "970422",
+      "bankAccount": "090912345688",
+      "bankOwner": "CONG TY TNHH BAN HANG PRO",
+      "currency": "VND",
+      "invoiceFooterNote": "Cảm ơn Quý khách đã mua sắm! Hàng hóa được đổi trả trong 7 ngày nếu có lỗi từ nhà sản xuất.",
+      "znsSettings": {
+        "mode": "simulation",
+        "oaId": "298192837491823",
+        "appId": "1029384756",
+        "secretKey": "sec_znsexamplekey2026",
+        "accessToken": "zns_token_valid_sample_demo_access_key",
+        "templates": {
+          "orderCreated": {
+            "id": "298370",
+            "name": "Xác nhận tạo đơn hàng thành công",
+            "enabled": true
+          },
+          "orderShipping": {
+            "id": "298371",
+            "name": "Thông báo xuất kho & Giao hàng",
+            "enabled": true
+          },
+          "orderCompleted": {
+            "id": "298372",
+            "name": "Cảm ơn & Giao hàng thành công",
+            "enabled": true
+          },
+          "orderCancelled": {
+            "id": "298373",
+            "name": "Thông báo hủy đơn hàng",
+            "enabled": true
+          }
+        }
+      }
+    },
+    "znsLogs": [
+      {
+        "id": "log-zns-1791873583955",
+        "orderId": "ord-1791873583847",
+        "orderCode": "DH-20261013-0005",
+        "phone": "0982801051",
+        "zaloPhone": "84982801051",
+        "customerName": "Nguy?n Van A",
+        "templateId": "298370",
+        "templateTitle": "XÁC NHẬN ĐẶT HÀNG THÀNH CÔNG",
+        "status": "sent",
+        "mode": "simulation",
+        "cost": 180,
+        "sentAt": "2026-10-13T06:39:43.955Z",
+        "messagePreview": "Kính gửi Quý khách Nguy?n Van A,\n\nĐơn hàng #DH-20261013-0005 của bạn đã được ghi nhận thành công trên hệ thống ZNS E-Commerce & Retail Store.\n\n• Tổng thanh toán: 505.000 ₫\n• Phương thức: VietQR\n• Địa chỉ nhận: S? nh� 151, An L?c, Trung Gi�, TP.H� N?i\n\nChúng tôi đang xử lý đóng gói và sẽ gửi thông tin vận chuyển đến bạn trong thời gian sớm nhất. Xin chân thành cảm ơn!",
+        "templateData": {
+          "customer_name": "Nguy?n Van A",
+          "order_code": "DH-20261013-0005",
+          "order_date": "13:39 13/10/2026",
+          "total_amount": "505.000 ₫",
+          "payment_status": "Chưa thanh toán (COD)"
+        },
+        "apiResponse": {
+          "error": 0,
+          "message": "Success (ZNS Sandbox Mode - Mô phỏng thành công)",
+          "data": {
+            "msg_id": "sim_msg_5flhx95i",
+            "sent_time": 1791873584157
+          }
+        }
+      },
+      {
+        "id": "log-zns-1",
+        "orderId": "ord-101",
+        "orderCode": "DH-20261013-0001",
+        "phone": "0912345678",
+        "customerName": "Nguyễn Văn Tuấn",
+        "templateId": "298371",
+        "templateTitle": "Thông báo xuất kho & Đang giao hàng",
+        "status": "sent",
+        "mode": "simulation",
+        "cost": 180,
+        "sentAt": "2026-10-12T14:02:15.000Z",
+        "messagePreview": "Xin chào Nguyễn Văn Tuấn, đơn hàng #DH-20261013-0001 của bạn đã được xuất kho và giao cho GHN (Mã vận đơn: GHN-882910471). Dự kiến giao trong 1-2 ngày tới. Cảm ơn bạn đã mua sắm!"
+      },
+      {
+        "id": "log-zns-2",
+        "orderId": "ord-102",
+        "orderCode": "DH-20261013-0002",
+        "phone": "0903112233",
+        "customerName": "Lê Hoàng Nam",
+        "templateId": "298372",
+        "templateTitle": "Xác nhận đơn hàng & Thanh toán thành công",
+        "status": "sent",
+        "mode": "simulation",
+        "cost": 200,
+        "sentAt": "2026-10-11T10:02:00.000Z",
+        "messagePreview": "Kính gửi Lê Hoàng Nam, đơn hàng #DH-20261013-0002 trị giá 1,240,000đ đã được xác nhận thanh toán thành công qua VietQR. Chúng tôi đang đóng gói gửi bạn sớm nhất!"
+      },
+      {
+        "id": "log-zns-3",
+        "orderId": "ord-103",
+        "orderCode": "DH-20261013-0003",
+        "phone": "0988776655",
+        "customerName": "Trần Thị Mai Phương",
+        "templateId": "298370",
+        "templateTitle": "Tiếp nhận đơn hàng mới",
+        "status": "sent",
+        "mode": "simulation",
+        "cost": 180,
+        "sentAt": "2026-10-13T07:46:10.000Z",
+        "messagePreview": "Cảm ơn Trần Thị Mai Phương đã đặt hàng tại ZNS Order Master. Mã đơn: #DH-20261013-0003, Tổng tiền: 743,000đ. Nhân viên sẽ liên hệ đóng gói ngay!"
+      }
+    ]
+  },
+  "stats": {
+    "totalOrders": 5,
+    "totalCustomers": 6,
+    "totalProducts": 6
+  }
+}
