@@ -1,5 +1,21 @@
 [
   {
+    "id": "aud-1791885133928-xpsq",
+    "timestamp": "2026-10-13T09:52:13.929Z",
+    "user": {
+      "id": "anonymous",
+      "name": "Zalo ZNS Webhook",
+      "role": "webhook"
+    },
+    "entityType": "ZNS",
+    "entityId": "0912345678",
+    "action": "ZNS_CALLBACK_RECEIVED",
+    "description": "Nhận callback từ Zalo OA: sự kiện [zns_delivered]",
+    "changes": [],
+    "reason": "{\"event_name\":\"zns_delivered\",\"phone\":\"0912345678\"}",
+    "ip": "127.0.0.1"
+  },
+  {
     "id": "aud-1791874861171-975j",
     "timestamp": "2026-10-13T07:01:01.171Z",
     "user": {

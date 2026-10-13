@@ -1,10 +1,22 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const DATA_DIR = path.join(__dirname, 'data');
+// Phát hiện môi trường Serverless (Vercel / AWS Lambda)
+const IS_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
 
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Đường dẫn dữ liệu:
+// - Serverless: Thư mục nguồn (/var/task) là Read-Only. Ghi file cục bộ dùng os.tmpdir() để tránh lỗi EROFS.
+// - Local/VPS: Dùng thư mục data/ trực tiếp trong mã nguồn.
+const SOURCE_DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = IS_SERVERLESS ? path.join(os.tmpdir(), 'zns-oms-data') : SOURCE_DATA_DIR;
+
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (e) {
+  // Bỏ qua nếu đã tồn tại
 }
 
 // File paths
@@ -15,6 +27,15 @@ const FILES = {
   categories: path.join(DATA_DIR, 'categories.json'),
   zns_logs: path.join(DATA_DIR, 'zns_logs.json'),
   settings: path.join(DATA_DIR, 'settings.json')
+};
+
+const TEMPLATE_FILES = {
+  orders: path.join(SOURCE_DATA_DIR, 'orders.json'),
+  customers: path.join(SOURCE_DATA_DIR, 'customers.json'),
+  products: path.join(SOURCE_DATA_DIR, 'products.json'),
+  categories: path.join(SOURCE_DATA_DIR, 'categories.json'),
+  zns_logs: path.join(SOURCE_DATA_DIR, 'zns_logs.json'),
+  settings: path.join(SOURCE_DATA_DIR, 'settings.json')
 };
 
 // Initial default data with version tags for Optimistic Concurrency Control
@@ -392,29 +413,147 @@ const INITIAL_SETTINGS = {
   }
 };
 
-// Safe JSON reading and writing
-function readJSON(file, fallback) {
+// ==========================================
+// CLOUD DATABASE & PERSISTENCE ADAPTER
+// ==========================================
+class CloudStorageAdapter {
+  constructor() {
+    this.type = 'none'; // 'upstash' | 'supabase' | 'none'
+    this.url = '';
+    this.token = '';
+    this.init();
+  }
+
+  init() {
+    // 1. Upstash Redis hoặc Vercel KV REST API (Ưu tiên số 1 cho Serverless / Vercel)
+    const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+    const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (kvUrl && kvToken) {
+      this.type = 'upstash';
+      this.url = kvUrl.replace(/\/+$/, '');
+      this.token = kvToken;
+      console.log('☁️ [CLOUD DB] Kết nối thành công Upstash Redis / Vercel KV REST API!');
+      return;
+    }
+
+    // 2. Supabase REST API
+    const spUrl = process.env.SUPABASE_URL;
+    const spKey = process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (spUrl && spKey) {
+      this.type = 'supabase';
+      this.url = spUrl.replace(/\/+$/, '');
+      this.token = spKey;
+      console.log('☁️ [CLOUD DB] Phát hiện cấu hình Supabase Cloud API!');
+      return;
+    }
+
+    if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
+      this.type = 'postgres_configured';
+      console.log('☁️ [CLOUD DB] Phát hiện biến DATABASE_URL / POSTGRES_URL!');
+      return;
+    }
+
+    console.log(`💾 [STORAGE] Đang chạy chế độ ${IS_SERVERLESS ? 'Serverless (/tmp)' : 'Local File (.json)'}`);
+  }
+
+  async get(key) {
+    if (this.type === 'upstash') {
+      try {
+        const res = await fetch(`${this.url}/get/${encodeURIComponent(key)}`, {
+          headers: { Authorization: `Bearer ${this.token}` }
+        });
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (json && json.result) {
+          return typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
+        }
+      } catch (err) {
+        console.warn(`[CloudDB] Không thể đọc key ${key}:`, err.message);
+      }
+    }
+    return null;
+  }
+
+  async set(key, value) {
+    if (this.type === 'upstash') {
+      try {
+        const payload = typeof value === 'string' ? value : JSON.stringify(value);
+        await fetch(`${this.url}/set/${encodeURIComponent(key)}`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        return true;
+      } catch (err) {
+        console.warn(`[CloudDB] Không thể ghi key ${key}:`, err.message);
+      }
+    }
+    return false;
+  }
+}
+
+const cloudStorage = new CloudStorageAdapter();
+
+// Bộ nhớ đệm RAM (In-Memory Cache) phục vụ tức thì trong các phiên Serverless
+const memoryCache = {
+  orders: null,
+  customers: null,
+  products: null,
+  categories: null,
+  zns_logs: null,
+  settings: null
+};
+
+// Safe JSON reading and writing with in-memory caching & template fallback
+function readJSON(fileKey, file, fallback, templateFile) {
+  if (memoryCache[fileKey]) {
+    return memoryCache[fileKey];
+  }
   try {
     if (!fs.existsSync(file)) {
-      writeJSON(file, fallback);
+      if (templateFile && fs.existsSync(templateFile)) {
+        try {
+          const raw = fs.readFileSync(templateFile, 'utf8');
+          const parsed = JSON.parse(raw);
+          writeJSON(fileKey, file, parsed);
+          memoryCache[fileKey] = parsed;
+          return parsed;
+        } catch (copyErr) {}
+      }
+      writeJSON(fileKey, file, fallback);
+      memoryCache[fileKey] = fallback;
       return fallback;
     }
     const data = fs.readFileSync(file, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    memoryCache[fileKey] = parsed;
+    return parsed;
   } catch (err) {
-    console.error(`Lỗi đọc file ${file}:`, err);
+    console.error(`Lỗi đọc file ${file}:`, err.message);
+    memoryCache[fileKey] = fallback;
     return fallback;
   }
 }
 
-function writeJSON(file, data) {
+function writeJSON(fileKey, file, data) {
+  memoryCache[fileKey] = data;
   try {
     fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
-    return true;
   } catch (err) {
-    console.error(`Lỗi ghi file ${file}:`, err);
-    return false;
+    // Trên Vercel nếu không ghi được đĩa cứng thì vẫn giữ trong RAM
+    console.warn(`Cảnh báo ghi file ${file}:`, err.message);
   }
+
+  // Đồng bộ lên Cloud DB bất đồng bộ nếu có cấu hình
+  if (cloudStorage.type === 'upstash') {
+    cloudStorage.set(`zns_${fileKey}`, data).catch(e => {
+      console.warn(`Lỗi đồng bộ Cloud DB key zns_${fileKey}:`, e.message);
+    });
+  }
+  return true;
 }
 
 // Mutex Lock for Atomic Transactions
@@ -422,48 +561,84 @@ let transactionQueue = Promise.resolve();
 
 // Initialize database files if not exist
 function initDB() {
-  if (!fs.existsSync(FILES.categories)) writeJSON(FILES.categories, INITIAL_CATEGORIES);
-  if (!fs.existsSync(FILES.products)) writeJSON(FILES.products, INITIAL_PRODUCTS);
-  if (!fs.existsSync(FILES.customers)) writeJSON(FILES.customers, INITIAL_CUSTOMERS);
-  if (!fs.existsSync(FILES.orders)) writeJSON(FILES.orders, INITIAL_ORDERS);
-  if (!fs.existsSync(FILES.zns_logs)) writeJSON(FILES.zns_logs, INITIAL_ZNS_LOGS);
-  if (!fs.existsSync(FILES.settings)) writeJSON(FILES.settings, INITIAL_SETTINGS);
+  readJSON('categories', FILES.categories, INITIAL_CATEGORIES, TEMPLATE_FILES.categories);
+  readJSON('products', FILES.products, INITIAL_PRODUCTS, TEMPLATE_FILES.products);
+  readJSON('customers', FILES.customers, INITIAL_CUSTOMERS, TEMPLATE_FILES.customers);
+  readJSON('orders', FILES.orders, INITIAL_ORDERS, TEMPLATE_FILES.orders);
+  readJSON('zns_logs', FILES.zns_logs, INITIAL_ZNS_LOGS, TEMPLATE_FILES.zns_logs);
+  readJSON('settings', FILES.settings, INITIAL_SETTINGS, TEMPLATE_FILES.settings);
 }
+
+// Đồng bộ từ Cloud DB khi khởi động
+async function syncFromCloud() {
+  if (cloudStorage.type === 'upstash') {
+    try {
+      const keys = ['orders', 'customers', 'products', 'categories', 'zns_logs', 'settings'];
+      for (const k of keys) {
+        const cloudData = await cloudStorage.get(`zns_${k}`);
+        if (cloudData && (Array.isArray(cloudData) ? cloudData.length > 0 : typeof cloudData === 'object')) {
+          memoryCache[k] = cloudData;
+          try {
+            fs.writeFileSync(FILES[k], JSON.stringify(cloudData, null, 2), 'utf8');
+          } catch (e) {}
+          console.log(`☁️ Đã đồng bộ [${k}] từ Upstash Redis Cloud (${Array.isArray(cloudData) ? cloudData.length + ' bản ghi' : 'OK'})`);
+        }
+      }
+    } catch (e) {
+      console.warn('Lỗi khi nạp dữ liệu từ Cloud DB:', e.message);
+    }
+  }
+}
+syncFromCloud();
 
 // Database Helper with Transaction Engine & Optimistic Locking
 const db = {
   // Orders
-  getOrders: () => readJSON(FILES.orders, INITIAL_ORDERS),
-  saveOrders: (data) => writeJSON(FILES.orders, data),
-  getOrderById: (id) => readJSON(FILES.orders, INITIAL_ORDERS).find(o => o.id === id || o.code === id),
+  getOrders: () => readJSON('orders', FILES.orders, INITIAL_ORDERS, TEMPLATE_FILES.orders),
+  saveOrders: (data) => writeJSON('orders', FILES.orders, data),
+  getOrderById: (id) => db.getOrders().find(o => o.id === id || o.code === id),
 
   // Customers
-  getCustomers: () => readJSON(FILES.customers, INITIAL_CUSTOMERS),
-  saveCustomers: (data) => writeJSON(FILES.customers, data),
-  getCustomerById: (id) => readJSON(FILES.customers, INITIAL_CUSTOMERS).find(c => c.id === id),
+  getCustomers: () => readJSON('customers', FILES.customers, INITIAL_CUSTOMERS, TEMPLATE_FILES.customers),
+  saveCustomers: (data) => writeJSON('customers', FILES.customers, data),
+  getCustomerById: (id) => db.getCustomers().find(c => c.id === id),
 
   // Products
-  getProducts: () => readJSON(FILES.products, INITIAL_PRODUCTS),
-  saveProducts: (data) => writeJSON(FILES.products, data),
-  getProductById: (id) => readJSON(FILES.products, INITIAL_PRODUCTS).find(p => p.id === id),
+  getProducts: () => readJSON('products', FILES.products, INITIAL_PRODUCTS, TEMPLATE_FILES.products),
+  saveProducts: (data) => writeJSON('products', FILES.products, data),
+  getProductById: (id) => db.getProducts().find(p => p.id === id),
 
   // Categories
-  getCategories: () => readJSON(FILES.categories, INITIAL_CATEGORIES),
-  saveCategories: (data) => writeJSON(FILES.categories, data),
+  getCategories: () => readJSON('categories', FILES.categories, INITIAL_CATEGORIES, TEMPLATE_FILES.categories),
+  saveCategories: (data) => writeJSON('categories', FILES.categories, data),
 
   // ZNS Logs
-  getZnsLogs: () => readJSON(FILES.zns_logs, INITIAL_ZNS_LOGS),
-  saveZnsLogs: (data) => writeJSON(FILES.zns_logs, data),
+  getZnsLogs: () => readJSON('zns_logs', FILES.zns_logs, INITIAL_ZNS_LOGS, TEMPLATE_FILES.zns_logs),
+  saveZnsLogs: (data) => writeJSON('zns_logs', FILES.zns_logs, data),
   addZnsLog: (log) => {
-    const logs = readJSON(FILES.zns_logs, INITIAL_ZNS_LOGS);
+    const logs = db.getZnsLogs();
     logs.unshift(log);
-    writeJSON(FILES.zns_logs, logs);
+    writeJSON('zns_logs', FILES.zns_logs, logs);
     return log;
   },
 
   // Settings
-  getSettings: () => readJSON(FILES.settings, INITIAL_SETTINGS),
-  saveSettings: (data) => writeJSON(FILES.settings, data),
+  getSettings: () => readJSON('settings', FILES.settings, INITIAL_SETTINGS, TEMPLATE_FILES.settings),
+  saveSettings: (data) => writeJSON('settings', FILES.settings, data),
+
+  // Storage info
+  getStorageInfo: () => ({
+    engine: cloudStorage.type === 'upstash' ? 'Upstash Redis / Vercel KV (Cloud)' : (IS_SERVERLESS ? 'Serverless (/tmp)' : 'Local File (.json)'),
+    isCloudConnected: cloudStorage.type === 'upstash',
+    cloudType: cloudStorage.type,
+    isServerless: IS_SERVERLESS,
+    dataDir: DATA_DIR,
+    itemCounts: {
+      orders: (db.getOrders() || []).length,
+      products: (db.getProducts() || []).length,
+      customers: (db.getCustomers() || []).length
+    }
+  }),
 
   /**
    * ATOMIC DATABASE TRANSACTION ENGINE (BEGIN TRANSACTION ... COMMIT / ROLLBACK)
@@ -561,12 +736,12 @@ const db = {
 
   // Reset to initial sample data
   resetAll: () => {
-    writeJSON(FILES.categories, INITIAL_CATEGORIES);
-    writeJSON(FILES.products, INITIAL_PRODUCTS);
-    writeJSON(FILES.customers, INITIAL_CUSTOMERS);
-    writeJSON(FILES.orders, INITIAL_ORDERS);
-    writeJSON(FILES.zns_logs, INITIAL_ZNS_LOGS);
-    writeJSON(FILES.settings, INITIAL_SETTINGS);
+    writeJSON('categories', FILES.categories, INITIAL_CATEGORIES);
+    writeJSON('products', FILES.products, INITIAL_PRODUCTS);
+    writeJSON('customers', FILES.customers, INITIAL_CUSTOMERS);
+    writeJSON('orders', FILES.orders, INITIAL_ORDERS);
+    writeJSON('zns_logs', FILES.zns_logs, INITIAL_ZNS_LOGS);
+    writeJSON('settings', FILES.settings, INITIAL_SETTINGS);
     return true;
   }
 };

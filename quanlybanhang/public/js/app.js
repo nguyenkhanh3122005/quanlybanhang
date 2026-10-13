@@ -2077,6 +2077,7 @@ async function loadSettings() {
       applySettingsToUI();
     }
   } catch (err) {}
+  loadWebhookAndDbStatus();
 }
 
 function applySettingsToUI() {
@@ -2137,3 +2138,52 @@ async function resetDemoData() {
     }
   } catch (err) {}
 }
+
+async function loadWebhookAndDbStatus() {
+  try {
+    // 1. Tải Webhook URLs động
+    const resHook = await apiFetch('/api/system/webhook-urls');
+    const dataHook = await resHook.json();
+    if (dataHook.success && dataHook.webhooks) {
+      if (document.getElementById('webhook-url-shipping')) {
+        document.getElementById('webhook-url-shipping').value = dataHook.webhooks.shipping.url;
+      }
+      if (document.getElementById('webhook-url-payment')) {
+        document.getElementById('webhook-url-payment').value = dataHook.webhooks.payment.url;
+      }
+      if (document.getElementById('webhook-url-zns')) {
+        document.getElementById('webhook-url-zns').value = dataHook.webhooks.zns.url;
+      }
+    }
+
+    // 2. Tải trạng thái Cloud Database
+    const resDb = await apiFetch('/api/system/db-status');
+    const dataDb = await resDb.json();
+    const badge = document.getElementById('badge-db-status');
+    if (badge && dataDb.success && dataDb.storage) {
+      const st = dataDb.storage;
+      if (st.isCloudConnected) {
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1.5';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ${st.engine}`;
+      } else {
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 flex items-center gap-1.5';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> ${st.engine}`;
+      }
+    }
+  } catch (err) {
+    console.warn('Lỗi tải thông tin webhook & CSDL:', err);
+  }
+}
+
+function copyWebhookUrl(elementId) {
+  const input = document.getElementById(elementId);
+  if (!input || !input.value) return;
+  navigator.clipboard.writeText(input.value).then(() => {
+    showToast('Đã sao chép Webhook URL vào bộ nhớ đệm!', 'success');
+  }).catch(() => {
+    input.select();
+    document.execCommand('copy');
+    showToast('Đã sao chép Webhook URL!', 'success');
+  });
+}
+

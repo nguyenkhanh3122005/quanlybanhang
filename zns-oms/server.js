@@ -15,8 +15,25 @@ const backupService = require('./backupService');
 const app = express();
 const PORT = process.env.PORT || 3500;
 
-// Security & Middlewares
-app.use(cors());
+// Security & Middlewares - Enterprise Cross-Origin Resource Sharing (CORS)
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true
+}));
+
+// Base URL Helper: Tự động nhận diện Domain hiện tại (Custom Domain, Vercel, hoặc Localhost)
+function getBaseUrl(req) {
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL.replace(/\/+$/, '');
+  }
+  if (!req) return `http://localhost:${PORT}`;
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host') || `localhost:${PORT}`;
+  return `${protocol}://${host}`;
+}
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -52,13 +69,10 @@ app.use((req, res, next) => {
 // Currency formatting helper
 const formatVND = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
 
-// Register Background Queue Handlers
+// Register Background Queue Handlers (Tối ưu hóa thời gian thực thi, chống 504 Timeout trên Serverless)
 queueService.registerHandler('EXPORT_REPORT_EXCEL', async (payload, updateProgress) => {
-  updateProgress(20);
-  await new Promise(r => setTimeout(r, 600));
-  updateProgress(60);
+  updateProgress(30);
   const orders = db.getOrders();
-  await new Promise(r => setTimeout(r, 400));
   updateProgress(100);
   return {
     downloadUrl: `/api/reports/download-csv?timestamp=${Date.now()}`,
@@ -78,7 +92,6 @@ queueService.registerHandler('BULK_ZNS_SEND', async (payload, updateProgress) =>
       results.push({ orderId: o.id, success: res.success });
     }
     updateProgress(Math.round(((i + 1) / total) * 100));
-    await new Promise(r => setTimeout(r, 150));
   }
   return { total, successCount: results.filter(r => r.success).length };
 });
@@ -93,7 +106,6 @@ queueService.registerHandler('PUSH_SHIPPING_BATCH', async (payload, updateProgre
       pushed.push({ orderCode: o.code, trackingCode: res.trackingCode });
     }
     updateProgress(Math.round(((i + 1) / orderIds.length) * 100));
-    await new Promise(r => setTimeout(r, 200));
   }
   return { pushed };
 });
@@ -681,6 +693,102 @@ app.post('/api/webhooks/payment', async (req, res) => {
   }
 });
 
+// Webhook tiếp nhận callback trạng thái gửi tin từ Zalo OA / ZNS Cloud
+app.post('/api/webhooks/zns', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const eventType = payload.event_name || payload.event || 'unknown';
+    const msgId = payload.msg_id || payload.message_id || '';
+    const phone = payload.phone || payload.recipient_id || '';
+
+    auditService.log({
+      user: { name: 'Zalo ZNS Webhook', role: 'webhook' },
+      entityType: 'ZNS',
+      entityId: msgId || phone || 'ZNS_EVENT',
+      action: 'ZNS_CALLBACK_RECEIVED',
+      description: `Nhận callback từ Zalo OA: sự kiện [${eventType}]`,
+      reason: JSON.stringify(payload),
+      ip: req.ip
+    });
+
+    res.json({
+      success: true,
+      received: true,
+      eventType,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    recordSystemError(err, 'POST /api/webhooks/zns');
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API Tra cứu danh sách Webhook URLs Động cho Domain hiện tại
+app.get('/api/system/webhook-urls', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  res.json({
+    success: true,
+    baseUrl,
+    isLocalhost: baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1'),
+    webhooks: {
+      shipping: {
+        name: 'Webhook Vận chuyển (GHN, GHTK, Viettel Post)',
+        url: `${baseUrl}/api/webhooks/shipping`,
+        method: 'POST',
+        guide: 'Cấu hình trong Cổng Khách hàng Doanh nghiệp của GHN (Cài đặt Webhook) hoặc GHTK Open API.'
+      },
+      payment: {
+        name: 'Webhook Biến động Số dư VietQR / Ngân hàng (Casso, PayOS, SePay)',
+        url: `${baseUrl}/api/webhooks/payment`,
+        method: 'POST',
+        guide: 'Dán URL này vào mục Tích hợp Webhook của Casso.vn, SePay.vn hoặc PayOS để kích hoạt tự động khớp lệnh thanh toán tức thì.'
+      },
+      zns: {
+        name: 'Webhook Callback Zalo Cloud OA / ZNS',
+        url: `${baseUrl}/api/webhooks/zns`,
+        method: 'POST',
+        guide: 'Cấu hình trong trang Zalo for Developers -> Ứng dụng -> Thiết lập Webhook OA.'
+      }
+    }
+  });
+});
+
+// API Kiểm tra trạng thái Cơ sở dữ liệu và Cơ chế lưu trữ đám mây
+app.get('/api/system/db-status', (req, res) => {
+  res.json({
+    success: true,
+    storage: db.getStorageInfo ? db.getStorageInfo() : { engine: 'LOCAL_FILE' }
+  });
+});
+
+// API Xuất báo cáo đơn hàng Excel / CSV định dạng chuẩn UTF-8 BOM (Zero-Timeout)
+app.get('/api/reports/download-csv', (req, res) => {
+  try {
+    const orders = db.getOrders();
+    let csv = '\uFEFFMã đơn hàng,Tên khách hàng,Số điện thoại,Địa chỉ giao hàng,Phương thức thanh toán,Trạng thái thanh toán,Trạng thái đơn,Tổng tiền (VNĐ),Đối tác vận chuyển,Mã vận đơn,Thời gian tạo\n';
+    orders.forEach(o => {
+      const code = `"${(o.code || '').replace(/"/g, '""')}"`;
+      const name = `"${(o.customerName || '').replace(/"/g, '""')}"`;
+      const phone = `"${(o.customerPhone || '').replace(/"/g, '""')}"`;
+      const address = `"${(o.customerAddress || '').replace(/"/g, '""')}"`;
+      const payMethod = `"${(o.paymentMethod || '').replace(/"/g, '""')}"`;
+      const payStatus = `"${(o.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán')}"`;
+      const orderStatus = `"${(o.orderStatus || '').replace(/"/g, '""')}"`;
+      const total = o.totalAmount || 0;
+      const carrier = `"${(o.carrier || '').replace(/"/g, '""')}"`;
+      const tracking = `"${(o.trackingCode || '').replace(/"/g, '""')}"`;
+      const created = `"${(o.createdAt || '').replace(/"/g, '""')}"`;
+      csv += `${code},${name},${phone},${address},${payMethod},${payStatus},${orderStatus},${total},${carrier},${tracking},${created}\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="zns-oms-don-hang-${Date.now()}.csv"`);
+    res.status(200).send(csv);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Đối soát công nợ COD và doanh thu chuyển khoản
 app.get('/api/reconciliation', (req, res) => {
   try {
@@ -1250,12 +1358,17 @@ app.get('/api/system/network-info', (req, res) => {
   });
 });
 
-// Khởi chạy server lắng nghe trên tất cả các interface mạng (0.0.0.0) để điện thoại cùng Wi-Fi vào được
-const LOCAL_IP = getLocalIP();
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`================================================================`);
-  console.log(`🚀 ZNS ORDER MASTER PRO - ENTERPRISE ORDER MANAGEMENT SYSTEM`);
-  console.log(`💻 Truy cập trên Máy tính / Laptop:   http://localhost:${PORT}`);
-  console.log(`📱 Truy cập trên Điện thoại / Tablet:  http://${LOCAL_IP}:${PORT}`);
-  console.log(`================================================================`);
-});
+// Export Express app cho Vercel Serverless Functions (@vercel/node)
+module.exports = app;
+
+// Khởi chạy server lắng nghe nếu chạy trực tiếp (Local PC / Laptop / VPS)
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  const LOCAL_IP = getLocalIP();
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`================================================================`);
+    console.log(`🚀 ZNS ORDER MASTER PRO - ENTERPRISE ORDER MANAGEMENT SYSTEM`);
+    console.log(`💻 Truy cập trên Máy tính / Laptop:   http://localhost:${PORT}`);
+    console.log(`📱 Truy cập trên Điện thoại / Tablet:  http://${LOCAL_IP}:${PORT}`);
+    console.log(`================================================================`);
+  });
+}
