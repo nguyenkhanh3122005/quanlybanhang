@@ -30,12 +30,19 @@ const state = {
   }
 };
 
-// Helper: Custom fetch with RBAC headers
+// Helper: Custom fetch with RBAC headers & Dynamic Backend Base URL (Render.com / Custom Cloud Backend)
+const API_BASE_URL = window.API_BASE_URL || localStorage.getItem('ZNS_API_BASE_URL') || '';
+
 async function apiFetch(url, options = {}) {
   const headers = options.headers || {};
   headers['x-user-id'] = state.currentUserId;
   options.headers = headers;
-  return fetch(url, options);
+
+  const fullUrl = (url.startsWith('/api') && API_BASE_URL)
+    ? API_BASE_URL.replace(/\/+$/, '') + url
+    : url;
+
+  return fetch(fullUrl, options);
 }
 
 // Currency Formatter
@@ -2308,6 +2315,7 @@ function applySettingsToUI() {
   if (document.getElementById('zns-tpl-order-shipping')) document.getElementById('zns-tpl-order-shipping').value = templates.orderShipping?.id || '298371';
   if (document.getElementById('zns-tpl-order-completed')) document.getElementById('zns-tpl-order-completed').value = templates.orderCompleted?.id || '298372';
   if (document.getElementById('zns-tpl-order-cancelled')) document.getElementById('zns-tpl-order-cancelled').value = templates.orderCancelled?.id || '298373';
+  if (document.getElementById('config-backend-api-url')) document.getElementById('config-backend-api-url').value = localStorage.getItem('ZNS_API_BASE_URL') || '';
 }
 
 async function saveStoreSettings() {
@@ -2334,6 +2342,48 @@ async function saveStoreSettings() {
       showToast('Đã lưu cài đặt cửa hàng!', 'success');
     }
   } catch (err) {}
+}
+
+function saveAndTestBackendUrl() {
+  const input = document.getElementById('config-backend-api-url');
+  const badge = document.getElementById('badge-backend-status');
+  if (!input) return;
+
+  const rawUrl = input.value.trim().replace(/\/+$/, '');
+  if (rawUrl) {
+    localStorage.setItem('ZNS_API_BASE_URL', rawUrl);
+    showToast(`Đã lưu Backend API URL: ${rawUrl}`, 'info');
+  } else {
+    localStorage.removeItem('ZNS_API_BASE_URL');
+    showToast('Đã chuyển về kết nối Backend cùng Host (Mặc định)', 'info');
+  }
+
+  if (badge) {
+    badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800';
+    badge.innerText = 'Đang kiểm tra...';
+  }
+
+  const checkUrl = (rawUrl ? rawUrl : '') + '/api/settings';
+  fetch(checkUrl)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        if (badge) {
+          badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800';
+          badge.innerText = 'Kết nối thành công (200 OK)';
+        }
+        showToast('Kết nối Backend API Server thành công!', 'success');
+      } else {
+        throw new Error('Dữ liệu không khớp');
+      }
+    })
+    .catch(err => {
+      if (badge) {
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800';
+        badge.innerText = 'Không thể kết nối';
+      }
+      showToast(`Không thể kết nối tới Backend URL: ${err.message}`, 'error');
+    });
 }
 
 async function resetDemoData() {

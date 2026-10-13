@@ -503,16 +503,21 @@ const INITIAL_ZALO_LEADS = [
 // ==========================================
 // CLOUD DATABASE & PERSISTENCE ADAPTER
 // ==========================================
+// ==========================================
+// CLOUD DATABASE & PERSISTENCE ADAPTER
+// ==========================================
 class CloudStorageAdapter {
   constructor() {
-    this.type = 'none'; // 'upstash' | 'supabase' | 'none'
+    this.type = 'none'; // 'postgres' | 'mongodb' | 'upstash' | 'none'
+    this.client = null;
+    this.pool = null;
     this.url = '';
     this.token = '';
     this.init();
   }
 
   init() {
-    // 1. Upstash Redis hoặc Vercel KV REST API (Ưu tiên số 1 cho Serverless / Vercel)
+    // 1. Upstash Redis hoặc Vercel KV REST API
     const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
     const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
     if (kvUrl && kvToken) {
@@ -523,24 +528,53 @@ class CloudStorageAdapter {
       return;
     }
 
-    // 2. Supabase REST API
-    const spUrl = process.env.SUPABASE_URL;
-    const spKey = process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (spUrl && spKey) {
-      this.type = 'supabase';
-      this.url = spUrl.replace(/\/+$/, '');
-      this.token = spKey;
-      console.log('☁️ [CLOUD DB] Phát hiện cấu hình Supabase Cloud API!');
-      return;
+    // 2. MongoDB Atlas (mongodb:// hoặc mongodb+srv://)
+    const mongoUri = process.env.MONGODB_URI || (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('mongodb') ? process.env.DATABASE_URL : null);
+    if (mongoUri) {
+      try {
+        const { MongoClient } = require('mongodb');
+        this.client = new MongoClient(mongoUri);
+        this.type = 'mongodb';
+        this.client.connect().then(() => {
+          console.log('☁️ [CLOUD DB] Kết nối thành công MongoDB Atlas Cloud!');
+        }).catch(err => {
+          console.warn('⚠️ [CLOUD DB] Lỗi kết nối MongoDB Atlas:', err.message);
+        });
+        return;
+      } catch (err) {
+        console.warn('⚠️ [CLOUD DB] Không thể khởi tạo driver MongoDB:', err.message);
+      }
     }
 
-    if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
-      this.type = 'postgres_configured';
-      console.log('☁️ [CLOUD DB] Phát hiện biến DATABASE_URL / POSTGRES_URL!');
-      return;
+    // 3. PostgreSQL / Neon / Supabase (postgres:// hoặc postgresql://)
+    const pgUrl = process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL || (process.env.DATABASE_URL && (process.env.DATABASE_URL.startsWith('postgres') || process.env.DATABASE_URL.startsWith('postgresql')) ? process.env.DATABASE_URL : null);
+    if (pgUrl) {
+      try {
+        const { Pool } = require('pg');
+        this.pool = new Pool({
+          connectionString: pgUrl,
+          ssl: { rejectUnauthorized: false }
+        });
+        this.type = 'postgres';
+        // Khởi tạo bảng key-value lưu trữ đám mây
+        this.pool.query(`
+          CREATE TABLE IF NOT EXISTS zns_kv_store (
+            key VARCHAR(255) PRIMARY KEY,
+            data JSONB,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `).then(() => {
+          console.log('☁️ [CLOUD DB] Kết nối thành công PostgreSQL / Neon / Supabase Cloud DB!');
+        }).catch(err => {
+          console.warn('⚠️ [CLOUD DB] Lỗi khởi tạo bảng PostgreSQL:', err.message);
+        });
+        return;
+      } catch (err) {
+        console.warn('⚠️ [CLOUD DB] Không thể khởi tạo driver PostgreSQL:', err.message);
+      }
     }
 
-    console.log(`💾 [STORAGE] Đang chạy chế độ ${IS_SERVERLESS ? 'Serverless (/tmp)' : 'Local File (.json)'}`);
+    console.log(`💾 [STORAGE] Đang chạy chế độ ${IS_SERVERLESS ? 'Serverless (/tmp)' : 'Persistent Local Storage (.json)'}`);
   }
 
   async get(key) {
@@ -556,6 +590,25 @@ class CloudStorageAdapter {
         }
       } catch (err) {
         console.warn(`[CloudDB] Không thể đọc key ${key}:`, err.message);
+      }
+    } else if (this.type === 'postgres' && this.pool) {
+      try {
+        const res = await this.pool.query('SELECT data FROM zns_kv_store WHERE key = $1', [key]);
+        if (res.rows && res.rows[0]) {
+          return res.rows[0].data;
+        }
+      } catch (err) {
+        console.warn(`[CloudDB PG] Không thể đọc key ${key}:`, err.message);
+      }
+    } else if (this.type === 'mongodb' && this.client) {
+      try {
+        const db = this.client.db('zns_oms');
+        const doc = await db.collection('kv_store').findOne({ key });
+        if (doc && doc.data) {
+          return doc.data;
+        }
+      } catch (err) {
+        console.warn(`[CloudDB Mongo] Không thể đọc key ${key}:`, err.message);
       }
     }
     return null;
@@ -576,6 +629,31 @@ class CloudStorageAdapter {
         return true;
       } catch (err) {
         console.warn(`[CloudDB] Không thể ghi key ${key}:`, err.message);
+      }
+    } else if (this.type === 'postgres' && this.pool) {
+      try {
+        const query = `
+          INSERT INTO zns_kv_store (key, data, updated_at)
+          VALUES ($1, $2, CURRENT_TIMESTAMP)
+          ON CONFLICT (key) DO UPDATE
+          SET data = EXCLUDED.data, updated_at = CURRENT_TIMESTAMP;
+        `;
+        await this.pool.query(query, [key, JSON.stringify(value)]);
+        return true;
+      } catch (err) {
+        console.warn(`[CloudDB PG] Không thể ghi key ${key}:`, err.message);
+      }
+    } else if (this.type === 'mongodb' && this.client) {
+      try {
+        const db = this.client.db('zns_oms');
+        await db.collection('kv_store').updateOne(
+          { key },
+          { $set: { key, data: value, updatedAt: new Date() } },
+          { upsert: true }
+        );
+        return true;
+      } catch (err) {
+        console.warn(`[CloudDB Mongo] Không thể ghi key ${key}:`, err.message);
       }
     }
     return false;
@@ -636,7 +714,7 @@ function writeJSON(fileKey, file, data) {
   }
 
   // Đồng bộ lên Cloud DB bất đồng bộ nếu có cấu hình
-  if (cloudStorage.type === 'upstash') {
+  if (cloudStorage.type !== 'none') {
     cloudStorage.set(`zns_${fileKey}`, data).catch(e => {
       console.warn(`Lỗi đồng bộ Cloud DB key zns_${fileKey}:`, e.message);
     });
@@ -660,7 +738,7 @@ function initDB() {
 
 // Đồng bộ từ Cloud DB khi khởi động
 async function syncFromCloud() {
-  if (cloudStorage.type === 'upstash') {
+  if (cloudStorage.type !== 'none') {
     try {
       const keys = ['orders', 'customers', 'products', 'categories', 'zns_logs', 'settings', 'zalo_leads'];
       for (const k of keys) {
@@ -670,7 +748,7 @@ async function syncFromCloud() {
           try {
             fs.writeFileSync(FILES[k], JSON.stringify(cloudData, null, 2), 'utf8');
           } catch (e) {}
-          console.log(`☁️ Đã đồng bộ [${k}] từ Upstash Redis Cloud (${Array.isArray(cloudData) ? cloudData.length + ' bản ghi' : 'OK'})`);
+          console.log(`☁️ Đã đồng bộ [${k}] từ ${cloudStorage.type.toUpperCase()} Cloud DB (${Array.isArray(cloudData) ? cloudData.length + ' bản ghi' : 'OK'})`);
         }
       }
     } catch (e) {
