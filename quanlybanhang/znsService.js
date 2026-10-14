@@ -1,4 +1,5 @@
 const db = require('./db');
+const { validateAndFormatVNPhone } = require('./phoneValidator');
 
 /**
  * ==============================================================================
@@ -269,15 +270,19 @@ class ZnsService {
     }
 
     const preview = this.generateMessageContent(eventType, order, settings);
-    const phone = (order.customerPhone || '').trim();
+    const rawPhone = (order.customerPhone || order.phone || '').trim();
 
-    // Chuẩn hóa số điện thoại theo chuẩn quốc tế Zalo (84xxxxxxxxx)
-    let formattedPhone = phone;
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '84' + formattedPhone.slice(1);
-    } else if (formattedPhone.startsWith('+84')) {
-      formattedPhone = '84' + formattedPhone.slice(3);
+    // Chuẩn hóa và kiểm định số điện thoại di động Việt Nam theo chuẩn ZNS (84xxxxxxxxx)
+    const phoneCheck = validateAndFormatVNPhone(rawPhone);
+    if (!phoneCheck.isValid) {
+      return {
+        success: false,
+        message: `Số điện thoại không hợp lệ để gửi ZNS: ${phoneCheck.message} (Đầu vào: "${rawPhone}")`
+      };
     }
+
+    const phone = phoneCheck.displayPhone;
+    const formattedPhone = phoneCheck.formattedPhone;
 
     const logEntry = {
       id: 'log-zns-' + Date.now(),
