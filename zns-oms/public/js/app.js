@@ -55,6 +55,46 @@ const formatDate = (isoStr) => {
   return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
+// Chuẩn hóa và kiểm tra số điện thoại di động Việt Nam hợp lệ (10 số, đầu 3,5,7,8,9)
+function validateAndFormatVNPhone(phone) {
+  if (!phone || typeof phone !== 'string') {
+    return {
+      isValid: false,
+      formattedPhone: '',
+      displayPhone: '',
+      message: 'Số điện thoại không được để trống.',
+    };
+  }
+
+  let cleanPhone = phone.replace(/[\s.()\-]/g, '');
+  const regex = /^(?:\+84|84|0)[35789]\d{8}$/;
+
+  if (!regex.test(cleanPhone)) {
+    return {
+      isValid: false,
+      formattedPhone: cleanPhone,
+      displayPhone: cleanPhone,
+      message: 'Số điện thoại không đúng định dạng di động Việt Nam (10 số).',
+    };
+  }
+
+  let znsPhone = cleanPhone;
+  if (znsPhone.startsWith('+84')) {
+    znsPhone = znsPhone.slice(1);
+  } else if (znsPhone.startsWith('0')) {
+    znsPhone = '84' + znsPhone.slice(1);
+  }
+
+  let displayPhone = '0' + znsPhone.slice(2);
+
+  return {
+    isValid: true,
+    formattedPhone: znsPhone,
+    displayPhone,
+    message: 'Hợp lệ',
+  };
+}
+
 // Toast Notifications
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
@@ -787,10 +827,18 @@ async function submitNewOrder() {
   const discount = Number(document.getElementById('calc-discount')?.value || 0);
   const sendZns = document.getElementById('toggle-send-zns')?.checked;
 
-  if (!phone || !name || !address) {
-    showToast('Vui lòng nhập đầy đủ tên, số điện thoại và địa chỉ!', 'error');
+  if (!name || !address) {
+    showToast('Vui lòng nhập đầy đủ tên và địa chỉ khách hàng!', 'error');
     return;
   }
+
+  // Xác thực và chuẩn hóa số điện thoại di động Việt Nam
+  const phoneCheck = validateAndFormatVNPhone(phone);
+  if (!phoneCheck.isValid) {
+    showToast(phoneCheck.message, 'error');
+    return;
+  }
+
   if (!state.newOrderCart.length) {
     showToast('Đơn hàng chưa có sản phẩm nào!', 'error');
     return;
@@ -799,7 +847,7 @@ async function submitNewOrder() {
   try {
     const payload = {
       customerName: name,
-      customerPhone: phone,
+      customerPhone: phoneCheck.displayPhone,
       customerAddress: address,
       items: state.newOrderCart.map(it => ({
         productId: it.productId,
@@ -2069,7 +2117,15 @@ async function triggerTestZnsSend() {
   const customerName = document.getElementById('test-zns-name')?.value.trim();
   const eventType = document.getElementById('test-zns-event')?.value;
   const totalAmount = document.getElementById('test-zns-amount')?.value;
-  if (!phone) return showToast('Vui lòng nhập số điện thoại thử nghiệm!', 'error');
+
+  // Xác thực và chuẩn hóa số điện thoại di động Việt Nam (phoneValidator)
+  const phoneCheck = validateAndFormatVNPhone(phone);
+  if (!phoneCheck.isValid) {
+    return showToast(phoneCheck.message, 'error');
+  }
+
+  const cleanPhone = phoneCheck.displayPhone;
+  const znsFormattedPhone = phoneCheck.formattedPhone;
 
   const zs = state.settings?.znsSettings || {};
   const isLive = zs.mode === 'live';
@@ -2078,22 +2134,22 @@ async function triggerTestZnsSend() {
     const res = await apiFetch('/api/zns/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, customerName, eventType, totalAmount: Number(totalAmount) || 0 })
+      body: JSON.stringify({ phone: znsFormattedPhone, customerName, eventType, totalAmount: Number(totalAmount) || 0 })
     });
     const data = await res.json();
 
     if (data.success) {
       if (data.mode === 'live') {
-        showToast(`Đã gửi tin nhắn thật thành công tới ứng dụng Zalo của ${phone}!`, 'success');
+        showToast(`Đã gửi tin nhắn thật thành công tới Zalo của ${cleanPhone} (Chuẩn ZNS: ${znsFormattedPhone})!`, 'success');
       } else {
-        showToast(`[Mô phỏng Sandbox] Đã ghi nhận gửi thử tới ${phone}. (Lưu ý: Không gửi máy thật, hãy bật Live để gửi thật)`, 'info');
+        showToast(`[Mô phỏng Sandbox] Gửi thử thành công tới ${cleanPhone} (Chuẩn ZNS: ${znsFormattedPhone}).`, 'info');
       }
     } else {
       showToast(`Gửi tin Zalo thất bại: ${data.errorMessage || data.message || 'Lỗi không xác định'}`, 'error');
     }
     await loadZnsLogs();
   } catch (err) {
-    showToast('Lỗi gửi tin ZNS', 'error');
+    showToast('Lỗi gửi tin ZNS: ' + err.message, 'error');
   }
 }
 

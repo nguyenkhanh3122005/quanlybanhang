@@ -12,6 +12,7 @@ const logisticsService = require('./logisticsService');
 const paymentService = require('./paymentService');
 const backupService = require('./backupService');
 const zaloBotService = require('./zaloBotService');
+const { validateAndFormatVNPhone } = require('./phoneValidator');
 
 const app = express();
 const PORT = process.env.PORT || 3500;
@@ -233,6 +234,17 @@ app.post('/api/orders', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng cung cấp đầy đủ thông tin khách hàng và sản phẩm' });
     }
 
+    // 1. Kiểm tra và chuẩn hóa số điện thoại di động Việt Nam (phoneValidator)
+    const phoneCheck = validateAndFormatVNPhone(customerPhone);
+    if (!phoneCheck.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: phoneCheck.message
+      });
+    }
+    const cleanCustomerPhone = phoneCheck.displayPhone;
+    const znsRecipientPhone = phoneCheck.formattedPhone;
+
     let createdOrder = null;
 
     // THỰC THI TRONG DATABASE TRANSACTION NGUYÊN TỬ
@@ -306,7 +318,8 @@ app.post('/api/orders', async (req, res) => {
         code: orderCode,
         customerId: finalCustId,
         customerName,
-        customerPhone,
+        customerPhone: cleanCustomerPhone,
+        znsPhone: znsRecipientPhone,
         customerAddress,
         carrier,
         trackingCode,
@@ -374,6 +387,59 @@ app.post('/api/orders', async (req, res) => {
   } catch (err) {
     recordSystemError(err, 'POST /api/orders Transaction Failure');
     res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// API Tạo đơn / Gửi tin ZNS (Chuẩn theo hướng dẫn tích hợp phoneValidator Bước 2)
+app.post('/api/orders/create', async (req, res) => {
+  const { customerName, phone, orderCode, totalAmount } = req.body;
+
+  // 1. Kiểm tra số điện thoại trước khi xử lý
+  const phoneCheck = validateAndFormatVNPhone(phone);
+  if (!phoneCheck.isValid) {
+    return res.status(400).json({
+      success: false,
+      message: phoneCheck.message,
+    });
+  }
+
+  // 2. Số điện thoại đã chuẩn hóa (ví dụ: 84981234567)
+  const recipientPhone = phoneCheck.formattedPhone;
+
+  // 3. Gửi tin ZNS (hoặc lưu vào Database)
+  try {
+    console.log(`Đang gửi ZNS đến số điện thoại: ${recipientPhone}`);
+
+    const code = orderCode || `DH-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const mockOrder = {
+      id: 'ord-' + Date.now(),
+      code: code,
+      customerName: customerName || 'Khách hàng ZNS',
+      customerPhone: recipientPhone,
+      customerAddress: req.body.customerAddress || 'Hà Nội',
+      carrier: req.body.carrier || 'Giao Hàng Nhanh',
+      trackingCode: req.body.trackingCode || '',
+      paymentMethod: req.body.paymentMethod || 'COD',
+      paymentStatus: 'unpaid',
+      totalAmount: Number(totalAmount) || 0,
+      orderStatus: 'pending'
+    };
+
+    const znsResult = await znsService.sendZnsNotification('orderCreated', mockOrder);
+
+    return res.json({
+      success: true,
+      message: 'Đơn hàng hợp lệ và đã gửi thông báo ZNS thành công!',
+      data: {
+        customerName: mockOrder.customerName,
+        phone: recipientPhone,
+        displayPhone: phoneCheck.displayPhone,
+        orderCode: mockOrder.code,
+        zns: znsResult
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -1321,11 +1387,22 @@ app.post('/api/zns/refresh-token', async (req, res) => {
 app.post('/api/zns/test', async (req, res) => {
   try {
     const { phone, customerName, eventType, totalAmount } = req.body;
+
+    // 1. Kiểm tra và chuẩn hóa số điện thoại di động Việt Nam trước khi gửi ZNS
+    const phoneCheck = validateAndFormatVNPhone(phone);
+    if (!phoneCheck.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: phoneCheck.message
+      });
+    }
+
     const mockOrder = {
       id: 'test-' + Date.now(),
       code: 'DH-TEST-' + Math.floor(1000 + Math.random() * 9000),
       customerName: customerName || 'Khách hàng Thử Nghiệm',
-      customerPhone: phone || '0901234567',
+      customerPhone: phoneCheck.displayPhone,
+      zaloPhone: phoneCheck.formattedPhone,
       customerAddress: 'Toà nhà Zalo, Quận 7, TP.HCM',
       carrier: 'Giao Hàng Nhanh (GHN)',
       trackingCode: 'TEST-GHN-123456',
@@ -1340,6 +1417,8 @@ app.post('/api/zns/test', async (req, res) => {
       realPhoneSent: result.realPhoneSent,
       message: result.message,
       errorMessage: result.errorMessage,
+      formattedPhone: phoneCheck.formattedPhone,
+      displayPhone: phoneCheck.displayPhone,
       result
     });
   } catch (err) {
