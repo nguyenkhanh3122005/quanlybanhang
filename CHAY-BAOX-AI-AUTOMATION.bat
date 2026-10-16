@@ -1,10 +1,10 @@
 @echo off
 chcp 65001 >nul
-title KHỞI CHẠY BAOX AI AUTOMATION TOOLS PRO MAX
+title KHỞI CHẠY NGỌC KHÁNH MEDIA - AUTO TOOLS
 color 0A
 
 echo ====================================================================
-echo    ⚡ KHỞI CHẠY BAOX AI AUTOMATION TOOLS PRO MAX 2026
+echo    ⚡ KHỞI CHẠY NGỌC KHÁNH MEDIA - AUTO TOOLS PRO MAX 2026
 echo ====================================================================
 echo.
 cd /d "%~dp0auto-media-matrix"

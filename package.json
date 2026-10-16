@@ -3,10 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "node ZNS-OMS-Standalone.js",
+    "dev": "node ZNS-OMS-Standalone.js",
+    "server": "node quanlybanhang/server.js",
+    "watch": "node --watch quanlybanhang/server.js",
+    "test:phone": "node C:/Users/khanh/.gemini/antigravity/brain/e1bf05f5-54d1-4aa5-86d1-1928890485c4/scratch/test_phone_validator.js",
+    "test:workflow": "node C:/Users/khanh/.gemini/antigravity/brain/e1bf05f5-54d1-4aa5-86d1-1928890485c4/scratch/run_full_workflow.js",
+    "next:dev": "next dev",
+    "next:build": "next build",
+    "next:start": "next start",
+    "test:src": "npx tsx tests/auto_test_src.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
