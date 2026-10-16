@@ -1,0 +1,34 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "auto-media-matrix\\server.py",
+      "name": "⚡ NGỌC KHÁNH MEDIA - FastAPI AI Matrix (Port 8000)",
+      "currentDir": "${workspaceRoot}\\auto-media-matrix"
+    },
+    {
+      "type": "node",
+      "project": "ZNS-OMS-Standalone.js",
+      "projectTarget": "",
+      "name": "🚀 ZNS-OMS Pro (Standalone - Cổng 3500)",
+      "currentDirectory": "${workspaceRoot}",
+      "env": {
+        "PORT": "3500",
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "type": "node",
+      "project": "quanlybanhang/server.js",
+      "projectTarget": "",
+      "name": "⚡ ZNS-OMS Backend (quanlybanhang/server.js)",
+      "currentDirectory": "${workspaceRoot}/quanlybanhang",
+      "env": {
+        "PORT": "3500",
+        "NODE_ENV": "development"
+      }
+    }
+  ]
+}
